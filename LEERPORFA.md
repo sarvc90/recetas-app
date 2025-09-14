@@ -75,16 +75,6 @@ public UsuarioResponse login(String email) {
 ### 3. **repository/** - Acceso a Datos
 **¿Qué hace?** Se conecta con la base de datos para hacer consultas.
 
-**Sin Repository (forma difícil):**
-```java
-// Tendrías que escribir SQL manualmente
-String sql = "SELECT * FROM usuarios WHERE email = ?";
-PreparedStatement stmt = connection.prepareStatement(sql);
-stmt.setString(1, email);
-ResultSet rs = stmt.executeQuery();
-// ...más código complejo
-```
-
 **Con Repository (forma fácil):**
 ```java
 Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
