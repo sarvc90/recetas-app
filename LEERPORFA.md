@@ -90,7 +90,7 @@ Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
 ---
 
 ### 4. **service/** - Lógica de Negocio
-**¿Qué hace?** Contiene las reglas y validaciones de tu aplicación.
+**¿Qué hace?** Contiene las reglas y validaciones de la aplicación.
 
 **Ejemplo de lo que hace:**
 ```java
@@ -105,8 +105,8 @@ public ApiResponse<UsuarioResponse> login(LoginRequest request) {
 **¿Por qué separarlo del Controller?**
 - **Controller**: Solo recibe/envía datos
 - **Service**: Hace todo el trabajo pesado
-- Si después quieres cambiar la API, solo cambias el Controller
-- Puedes reutilizar el Service en otros lugares
+- Si después quiere cambiar la API, solo cambia el Controller
+- Puede reutilizar el Service en otros lugares
 
 ---
 
