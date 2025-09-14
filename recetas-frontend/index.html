@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetas App - Registro y Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>🍳 Recetas App</h1>
+
+    <!-- SECCIÓN DE REGISTRO -->
+    <div class="form-section">
+        <h2>📝 Registro de Usuario</h2>
+        <div class="form-group">
+            <label for="nombre">Nombre completo:</label>
+            <input type="text" id="nombre" placeholder="Ej: María García">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="ejemplo@email.com">
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+        </div>
+        <button onclick="registrarUsuario()">Crear Cuenta</button>
+        <div id="resultado-registro" class="result"></div>
+    </div>
+
+    <!-- SECCIÓN DE LOGIN -->
+    <div class="form-section">
+        <h2>🔐 Iniciar Sesión</h2>
+        <div class="form-group">
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" placeholder="tu@email.com">
+        </div>
+        <div class="form-group">
+            <label for="login-password">Contraseña:</label>
+            <input type="password" id="login-password" placeholder="Tu contraseña">
+        </div>
+        <button onclick="loginUsuario()">Ingresar</button>
+        <div id="resultado-login" class="result"></div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
