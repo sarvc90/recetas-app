@@ -50,7 +50,7 @@ async function registrarUsuario() {
         if (response.ok) {
             const data = await response.json();
             mostrarResultado('resultado-registro',
-                `✅ ¡Registro exitoso! Bienvenido ${data.nombre}.<br>Tu ID de usuario es: ${data.id}`, 'success');
+                `✅ ¡Registro exitoso! Bienvenido ${data.data.nombre}.<br>Tu ID de usuario es: ${data.data.id}`, 'success');
             limpiarFormularios();
         } else {
             const errorText = await response.text();
@@ -96,7 +96,7 @@ async function loginUsuario() {
         if (response.ok) {
             const data = await response.json();
             mostrarResultado('resultado-login',
-                `✅ ¡Login exitoso! Bienvenido de nuevo ${data.nombre}<br>Email: ${data.email}`, 'success');
+                `✅ ¡Login exitoso! Bienvenido de nuevo ${data.data.nombre}<br>Email: ${data.data.email}`, 'success');
             document.getElementById('login-password').value = '';
         } else {
             const errorText = await response.text();
