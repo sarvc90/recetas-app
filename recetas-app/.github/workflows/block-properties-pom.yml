@@ -1,0 +1,43 @@
+name: 🔒 Block Properties and POM Changes
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  check-critical-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Check for modified properties/pom files
+        run: |
+          echo "Checking for modifications in critical files..."
+          
+          # Obtener archivos modificados en el PR
+          git fetch origin ${{ github.base_ref }}
+          MODIFIED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          
+          echo "Modified files:"
+          echo "$MODIFIED_FILES"
+          echo ""
+          
+          # Buscar archivos críticos (pom.xml o .properties)
+          CRITICAL_FILES=$(echo "$MODIFIED_FILES" | grep -E '(pom\.xml|\.properties)$') || true
+          
+          if [ -n "$CRITICAL_FILES" ]; then
+            echo "❌ ERROR: No se permiten modificaciones en:"
+            echo "$CRITICAL_FILES"
+            echo ""
+            echo "📋 Reglas:"
+            echo "- pom.xml → BLOQUEADO"
+            echo "- *.properties → BLOQUEADO"
+            echo ""
+            echo "💡 Solo los administradores pueden modificar estos archivos"
+            exit 1
+          fi
+          
+          echo "✅ No se modificaron archivos críticos"
+          echo "✅ PR aprobado para merge"
