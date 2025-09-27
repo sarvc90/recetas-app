@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recetas Deliciosas</title>
+  <link rel="stylesheet" href="styles-recetas.css">
+</head>
+<body>
+<header>
+  <h1>Recetas Deliciosas</h1>
+</header>
+
+<main>
+  <!-- Estado de carga -->
+  <div id="loading" class="hidden">Cargando recetas...</div>
+
+  <!-- Mensajes -->
+  <div id="message" class="hidden"></div>
+
+  <!-- Grid de recetas -->
+  <div id="recetasGrid" class="grid"></div>
+
+  <!-- Botón de paginación -->
+  <div class="pagination">
+    <button id="loadMore" class="hidden">Cargar más</button>
+  </div>
+</main>
+
+<!-- Modal de detalle -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="closeModal" class="close">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <img id="modalImage" alt="Imagen receta">
+    <div class="modal-info">
+      <h3>Ingredientes</h3>
+      <ul id="modalIngredientes"></ul>
+      <h3>Instrucciones</h3>
+      <p id="modalInstrucciones"></p>
+    </div>
+  </div>
+</div>
+
+<script src="recetas.js"></script>
+</body>
+</html>

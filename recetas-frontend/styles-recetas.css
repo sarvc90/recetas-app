@@ -1,0 +1,129 @@
+/*styles-recetas.css*/
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9f9f9;
+    color: #333;
+    padding: 20px;
+}
+
+header h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #53b6ae;
+}
+
+/* Grid de recetas */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Card receta */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.card h3 {
+    margin: 10px;
+    color: #53b6ae;
+}
+
+.card p {
+    margin: 0 10px 10px 10px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Botón cargar más */
+.pagination {
+    text-align: center;
+    margin: 30px 0;
+}
+
+button {
+    padding: 12px 25px;
+    background: #53b6ae;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover { background: #53b6ae; }
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    padding: 20px;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.modal-info h3 { color: #53b6ae; margin-top: 15px; }
+.modal-info ul { margin-left: 20px; margin-bottom: 10px; }
+.modal-info p { font-size: 0.95rem; color: #555; margin-bottom: 10px; }
+
+.close {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Loading y mensaje */
+#loading, #message { text-align: center; font-weight: bold; margin: 20px 0; color: #53b6ae; }
+
+.hidden { display: none; }

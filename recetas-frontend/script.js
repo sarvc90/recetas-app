@@ -97,6 +97,16 @@ async function loginUsuario() {
             const data = await response.json();
             mostrarResultado('resultado-login',
                 `✅ ¡Login exitoso! Bienvenido de nuevo ${data.data.nombre}<br>Email: ${data.data.email}`, 'success');
+            // Limpiar campo contraseña
+            document.getElementById('login-password').value = '';
+
+            // Guardar datos en localStorage (puedes guardar token si tu backend lo envía)
+            localStorage.setItem("usuario", JSON.stringify(data.data));
+
+            // Redirigir a recetas.html después de 1.5 segundos
+            setTimeout(() => {
+                window.location.href = "recetas.html";
+            }, 1500);
             document.getElementById('login-password').value = '';
         } else {
             const errorText = await response.text();
