@@ -5,17 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recetas-frontend/recetas.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recetas-frontend/recetas.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/recetas-app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/recetas-app.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/RecetasAppApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/RecetasAppApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/script.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.agent.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.edit.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/config/CloudinaryConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/config/JpaConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/service/ImageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.html" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.js" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +71,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.RecetasAppApplication.executor": "Run",
     "git-widget-placeholder": "master",
     "last_opened_file_path": "C:/Users/Lenovo/IdeaProjects/recetas-app",
@@ -116,5 +121,16 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

@@ -1,45 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recetas Deliciosas</title>
-  <link rel="stylesheet" href="styles-recetas.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Rincón de los Sabores - Recetas</title>
+    <link rel="stylesheet" href="styles-recetas.css">
 </head>
 <body>
-<header>
-  <h1>Recetas Deliciosas</h1>
-</header>
+<div class="container">
+    <h1>El Rincón de los Sabores</h1>
 
-<main>
-  <!-- Estado de carga -->
-  <div id="loading" class="hidden">Cargando recetas...</div>
+    <div class="content-section">
+        <!-- Botón para agregar receta -->
+        <div class="add-recipe-section">
+            <button id="addRecipeBtn" class="primary-btn">Agregar Nueva Receta</button>
+        </div>
 
-  <!-- Mensajes -->
-  <div id="message" class="hidden"></div>
+        <!-- Formulario de nueva receta (oculto por defecto) -->
+        <div id="recipeForm" class="recipe-form hidden">
+            <h2>Nueva Receta</h2>
+            <form id="newRecipeForm">
+                <div class="form-group">
+                    <label for="recipeName">Nombre de la receta:</label>
+                    <input type="text" id="recipeName" required>
+                </div>
+                <div class="form-group">
+                    <label for="recipeDescription">Descripción:</label>
+                    <textarea id="recipeDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="recipeImage">Imagen:</label>
+                    <input type="file" id="recipeImage" accept="image/*" required>
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                <div class="form-group">
+                    <label for="recipeIngredients">Ingredientes (uno por línea):</label>
+                    <textarea id="recipeIngredients" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="recipeInstructions">Instrucciones:</label>
+                    <textarea id="recipeInstructions" required></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="submit-btn">Guardar Receta</button>
+                    <button type="button" class="cancel-btn" id="cancelRecipeBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
 
-  <!-- Grid de recetas -->
-  <div id="recetasGrid" class="grid"></div>
+        <!-- Estado de carga -->
+        <div id="loading" class="hidden">Cargando recetas...</div>
 
-  <!-- Botón de paginación -->
-  <div class="pagination">
-    <button id="loadMore" class="hidden">Cargar más</button>
-  </div>
-</main>
+        <!-- Mensajes -->
+        <div id="message" class="hidden"></div>
+
+        <!-- Grid de recetas -->
+        <div id="recetasGrid" class="grid"></div>
+
+        <!-- Botón de paginación -->
+        <div class="pagination">
+            <button id="loadMore" class="hidden">Cargar más</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal de detalle -->
 <div id="modal" class="modal hidden">
-  <div class="modal-content">
-    <span id="closeModal" class="close">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <img id="modalImage" alt="Imagen receta">
-    <div class="modal-info">
-      <h3>Ingredientes</h3>
-      <ul id="modalIngredientes"></ul>
-      <h3>Instrucciones</h3>
-      <p id="modalInstrucciones"></p>
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <img id="modalImage" alt="Imagen receta">
+        <div class="modal-info">
+            <h3>Ingredientes</h3>
+            <ul id="modalIngredientes"></ul>
+            <h3>Instrucciones</h3>
+            <p id="modalInstrucciones"></p>
+        </div>
     </div>
-  </div>
 </div>
 
 <script src="recetas.js"></script>
