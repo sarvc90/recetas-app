@@ -26,17 +26,20 @@ public class RecetaController {
     @Autowired
     private ImageService imageService;
 
+    // ✅ Obtener todas las recetas (paginadas)
     @GetMapping
     public Page<Receta> getAllRecetas(Pageable pageable) {
         return recetaRepository.findAll(pageable);
     }
 
+    // ✅ Crear nueva receta
     @PostMapping
     public ResponseEntity<Receta> crearReceta(@RequestBody Receta receta) {
         receta.setFechaCreacion(LocalDateTime.now());
         return ResponseEntity.ok(recetaRepository.save(receta));
     }
 
+    // ✅ Subida de imágenes
     @PostMapping("/upload-image")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
@@ -48,5 +51,23 @@ public class RecetaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al subir la imagen: " + e.getMessage()));
         }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarReceta(@PathVariable Long id, @RequestBody Receta recetaActualizada) {
+        return recetaRepository.findById(id)
+                .<ResponseEntity<?>>map(receta -> {   // 👈 Forzamos a que el map devuelva ResponseEntity<?>
+                    receta.setNombre(recetaActualizada.getNombre());
+                    receta.setDescripcion(recetaActualizada.getDescripcion());
+                    receta.setIngredientes(recetaActualizada.getIngredientes());
+                    receta.setInstrucciones(recetaActualizada.getInstrucciones());
+                    receta.setImagenUrl(recetaActualizada.getImagenUrl());
+                    receta.setFechaActualizacion(LocalDateTime.now());
+
+                    Receta guardada = recetaRepository.save(receta);
+                    return ResponseEntity.ok(guardada); // ✅ ahora el compilador entiende que es ResponseEntity<?>
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse(false, "Receta no encontrada"))); // ✅ también ResponseEntity<?>
     }
 }

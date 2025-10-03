@@ -120,19 +120,54 @@ button:hover {
 }
 
 .modal-content {
-    background: #fff;
-    border-radius: 12px;
-    max-width: 600px;
-    width: 100%;
+    background-color: #fefefe;
+    margin: 5% auto;
     padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
-    animation: fadeIn 0.3s ease;
 }
 
-.modal-content img {
-    width: 100%;
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+}
+
+.close:hover {
+    background: #c0392b;
+}
+
+#modalImage {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+    display: block;
+    margin: 0 auto 15px auto;
     border-radius: 8px;
-    margin-bottom: 15px;
+    object-fit: contain;
+}
+
+.modal-info {
+    margin-top: 20px;
+    padding: 15px;
 }
 
 .modal-info h3 {
@@ -143,33 +178,22 @@ button:hover {
 .modal-info ul {
     margin-left: 20px;
     margin-bottom: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-.modal-info p {
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 10px;
-}
-
-.close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #333;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+#modalInstrucciones {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    margin: 10px 0;
+    line-height: 1.6;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-line;
 }
 
 /* Loading y mensaje */
@@ -291,6 +315,33 @@ button:hover {
     background: #c0392b;
 }
 
+/* Estilo personalizado para el scrollbar */
+.modal-content::-webkit-scrollbar,
+#modalIngredientes::-webkit-scrollbar,
+#modalInstrucciones::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+#modalIngredientes::-webkit-scrollbar-track,
+#modalInstrucciones::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+#modalIngredientes::-webkit-scrollbar-thumb,
+#modalInstrucciones::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+#modalIngredientes::-webkit-scrollbar-thumb:hover,
+#modalInstrucciones::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 /* Responsive para móviles */
 @media (max-width: 600px) {
     .container {
@@ -308,5 +359,14 @@ button:hover {
 
     .grid {
         grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    #modalImage {
+        max-height: 300px;
     }
 }
