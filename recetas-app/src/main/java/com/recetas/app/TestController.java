@@ -1,4 +1,4 @@
-package com.recetas.app.controller;
+package com.recetas.app;
 
 import com.recetas.app.entity.Receta;
 import com.recetas.app.repository.RecetaRepository;

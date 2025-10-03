@@ -5,21 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.agent.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.edit.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/config/CloudinaryConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/config/JpaConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/service/ImageService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/TestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/TestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.html" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.js" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,6 +106,8 @@
       <workItem from="1758995644511" duration="724000" />
       <workItem from="1758996437391" duration="48000" />
       <workItem from="1758996648066" duration="7544000" />
+      <workItem from="1759172398712" duration="288000" />
+      <workItem from="1759454028188" duration="3318000" />
     </task>
     <servers />
   </component>

@@ -64,34 +64,67 @@ newRecipeForm.addEventListener('submit', async (e) => {
         // Primero subir la imagen
         const formData = new FormData();
         formData.append('file', imageInput.files[0]);
+        if (!imageInput.files[0]) {
+            throw new Error("Debes seleccionar una imagen antes de guardar la receta");
+        }
 
         const imageResponse = await fetch(`${API_URL}/upload-image`, {
             method: 'POST',
             body: formData
         });
 
-        if (!imageResponse.ok) throw new Error('Error al subir la imagen');
+        if (!imageResponse.ok) {
+            const errorMsg = await imageResponse.text();
+            throw new Error(errorMsg);
+        }
+
         const imageData = await imageResponse.json();
+        const imageUrl = imageData.url;
+        console.log("URL de la imagen:", imageUrl);
 
         // Crear la receta con la URL de la imagen
         const recetaData = {
             nombre: document.getElementById('recipeName').value,
             descripcion: document.getElementById('recipeDescription').value,
-            ingredientes: document.getElementById('recipeIngredients').value.split('\n').filter(i => i.trim()),
+            ingredientes: document.getElementById('recipeIngredients').value.replace(/\n/g, ", "),
             instrucciones: document.getElementById('recipeInstructions').value,
-            imagenUrl: imageData.data, // URL de la imagen subida
+            imagenUrl: imageUrl, // URL de la imagen subida
             usuarioId: usuario.id
         };
 
-        const recetaResponse = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(recetaData)
-        });
+        const editingId = newRecipeForm.dataset.editingId;
 
-        if (!recetaResponse.ok) throw new Error('Error al crear la receta');
+        if (editingId) {
+            // PUT para actualizar
+            const recetaResponse = await fetch(`${API_URL}/${editingId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(recetaData)
+            });
+            if (!recetaResponse.ok) throw new Error('Error al actualizar la receta');
+            const recetaActualizada = await recetaResponse.json();
+
+            // Actualizar tarjeta en el grid
+            const card = document.querySelector(`.card[data-id="${editingId}"]`);
+            card.querySelector('h3').textContent = recetaActualizada.nombre;
+            card.querySelector('p').textContent = recetaActualizada.descripcion;
+            card.querySelector('img').src = recetaActualizada.imagenUrl;
+
+            delete newRecipeForm.dataset.editingId;
+        } else {
+            const recetaResponse = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(recetaData)
+            });
+
+            if (!recetaResponse.ok) throw new Error('Error al crear la receta');
+            const nuevaReceta = await recetaResponse.json();
+
+            renderRecetas([nuevaReceta]);
+        }
 
         // Limpiar formulario y actualizar lista
         recipeForm.classList.add('hidden');
@@ -182,7 +215,22 @@ function renderRecetas(recetas) {
             <img src="${imagen}" alt="${nombre}">
             <h3>${nombre}</h3>
             <p>${descripcion}</p>
+            <div class="card-actions">
+                <button class="edit-btn">✏️ Editar</button>
+            </div>
         `;
+
+        card.querySelector('.edit-btn').addEventListener('click', () => {
+            recipeForm.classList.remove('hidden');
+            document.getElementById('recipeName').value = r.nombre;
+            document.getElementById('recipeDescription').value = r.descripcion;
+            document.getElementById('recipeIngredients').value = r.ingredientes;
+            document.getElementById('recipeInstructions').value = r.instrucciones;
+            imagePreview.innerHTML = r.imagenUrl ? `<img src="${r.imagenUrl}">` : '';
+
+            // Guardar ID en dataset para saber si es edición
+            newRecipeForm.dataset.editingId = r.id;
+        });
 
         card.addEventListener("click", () => openModal(r));
         recetasGrid.appendChild(card);
