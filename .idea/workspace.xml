@@ -6,10 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/TestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/TestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.html" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.js" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +38,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/sarvc90/recetas-app.git&quot;,
-    &quot;accountId&quot;: &quot;f10011c8-4287-438a-82b4-65016593e5ed&quot;
+    &quot;accountId&quot;: &quot;d9d960eb-3cd7-4898-bc21-4d29bba7e69d&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -49,35 +49,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "JavaScript Debug.index.html.executor": "Run",
-    "JavaScript Debug.recetas.html.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.RecetasAppApplication.executor": "Run",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/Lenovo/IdeaProjects/recetas-app",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;JavaScript Debug.index.html.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.recetas.html.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.RecetasAppApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Lenovo/IdeaProjects/recetas-app&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="RecetasAppApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -91,11 +92,12 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.26775.15" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.26775.15" />
       </set>
     </attachedChunks>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="" />
@@ -108,6 +110,8 @@
       <workItem from="1758996648066" duration="7544000" />
       <workItem from="1759172398712" duration="288000" />
       <workItem from="1759454028188" duration="3318000" />
+      <workItem from="1759538642494" duration="2829000" />
+      <workItem from="1759541758149" duration="318000" />
     </task>
     <servers />
   </component>

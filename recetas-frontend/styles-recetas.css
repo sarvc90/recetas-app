@@ -342,6 +342,116 @@ button:hover {
     background: #555;
 }
 
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
+}
+
+.delete-mode-btn {
+    background: #e74c3c;
+}
+
+.delete-mode-btn:hover {
+    background: #c0392b;
+}
+
+/* Modal de eliminación */
+.delete-modal .modal-content {
+    max-width: 600px;
+}
+
+.delete-modal h3 {
+    color: #e74c3c;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.delete-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 20px 0;
+}
+
+.delete-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border: 2px solid #e3eef3;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+}
+
+.delete-item:hover {
+    border-color: #e74c3c;
+    background: #fff5f5;
+}
+
+.delete-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.delete-item-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 15px;
+}
+
+.delete-item-info {
+    flex: 1;
+}
+
+.delete-item-info h4 {
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.delete-item-info p {
+    color: #666;
+    font-size: 14px;
+}
+
+.delete-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.delete-actions button {
+    padding: 12px 25px;
+}
+
+.confirm-delete-btn {
+    background: #e74c3c;
+}
+
+.confirm-delete-btn:hover {
+    background: #c0392b;
+}
+
+.confirm-delete-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive para botones de acción */
+@media (max-width: 600px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+
 /* Responsive para móviles */
 @media (max-width: 600px) {
     .container {
@@ -369,4 +479,6 @@ button:hover {
     #modalImage {
         max-height: 300px;
     }
+
+
 }

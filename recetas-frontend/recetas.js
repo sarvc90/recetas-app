@@ -3,6 +3,13 @@ const API_URL = "http://localhost:8080/api/recetas"; // Ajusta a tu backend
 const API_BASE_URL = "http://localhost:8080/api";
 const pageSize = 6;
 let currentPage = 0;
+let selectedRecetasToDelete = new Set();
+const deleteRecipesBtn = document.getElementById('deleteRecipesBtn');
+const deleteModal = document.getElementById('deleteModal');
+const closeDeleteModal = document.getElementById('closeDeleteModal');
+const deleteList = document.getElementById('deleteList');
+const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
 const recetasGrid = document.getElementById("recetasGrid");
 const loading = document.getElementById("loading");
@@ -278,3 +285,123 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchRecetas();
 });
+
+
+deleteRecipesBtn?.addEventListener('click', async () => {
+    await mostrarModalEliminar();
+});
+
+closeDeleteModal?.addEventListener('click', () => {
+    deleteModal.classList.add('hidden');
+    selectedRecetasToDelete.clear();
+});
+
+cancelDeleteBtn?.addEventListener('click', () => {
+    deleteModal.classList.add('hidden');
+    selectedRecetasToDelete.clear();
+});
+
+confirmDeleteBtn?.addEventListener('click', async () => {
+    await eliminarRecetasSeleccionadas();
+});
+
+// ================== MODAL DE ELIMINACIÓN ==================
+async function mostrarModalEliminar() {
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+    try {
+        const response = await fetch(`${API_URL}/usuario/${usuario.id}`);
+        if (!response.ok) throw new Error('Error al cargar recetas');
+
+        const recetas = await response.json();
+
+        if (!recetas || recetas.length === 0) {
+            message.textContent = 'No tienes recetas para eliminar';
+            message.classList.remove('hidden');
+            setTimeout(() => message.classList.add('hidden'), 3000);
+            return;
+        }
+
+        deleteList.innerHTML = '';
+        selectedRecetasToDelete.clear();
+        confirmDeleteBtn.disabled = true;
+
+        recetas.forEach(receta => {
+            const item = document.createElement('div');
+            item.className = 'delete-item';
+            item.innerHTML = `
+                <input type="checkbox" id="delete-${receta.id}" data-id="${receta.id}">
+                <img src="${receta.imagenUrl || 'https://via.placeholder.com/60'}" 
+                     alt="${receta.nombre}" class="delete-item-image">
+                <div class="delete-item-info">
+                    <h4>${receta.nombre}</h4>
+                    <p>${receta.descripcion || 'Sin descripción'}</p>
+                </div>
+            `;
+
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedRecetasToDelete.add(parseInt(e.target.dataset.id));
+                } else {
+                    selectedRecetasToDelete.delete(parseInt(e.target.dataset.id));
+                }
+                confirmDeleteBtn.disabled = selectedRecetasToDelete.size === 0;
+            });
+
+            deleteList.appendChild(item);
+        });
+
+        deleteModal.classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Error:', error);
+        message.textContent = 'Error al cargar tus recetas';
+        message.classList.remove('hidden');
+    }
+}
+
+async function eliminarRecetasSeleccionadas() {
+    if (selectedRecetasToDelete.size === 0) return;
+
+    const totalRecetas = selectedRecetasToDelete.size;
+    let eliminadas = 0;
+    let errores = 0;
+
+    for (const id of selectedRecetasToDelete) {
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                eliminadas++;
+                const card = document.querySelector(`.card[data-id="${id}"]`);
+                if (card) card.remove();
+            } else {
+                errores++;
+            }
+        } catch (error) {
+            console.error(`Error al eliminar receta ${id}:`, error);
+            errores++;
+        }
+    }
+
+    deleteModal.classList.add('hidden');
+    selectedRecetasToDelete.clear();
+
+    if (errores === 0) {
+        message.textContent = `✅ ${eliminadas} receta${eliminadas > 1 ? 's' : ''} eliminada${eliminadas > 1 ? 's' : ''} correctamente`;
+    } else {
+        message.textContent = `${eliminadas} eliminadas, ${errores} con errores`;
+    }
+
+    message.classList.remove('hidden');
+    setTimeout(() => message.classList.add('hidden'), 3000);
+
+    if (recetasGrid.children.length === 0) {
+        message.textContent = "No hay más recetas disponibles";
+        message.classList.remove("hidden");
+    }
+}
+

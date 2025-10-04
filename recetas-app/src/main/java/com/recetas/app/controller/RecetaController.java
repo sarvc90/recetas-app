@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,6 +31,13 @@ public class RecetaController {
     @GetMapping
     public Page<Receta> getAllRecetas(Pageable pageable) {
         return recetaRepository.findAll(pageable);
+    }
+
+    // Obtener recetas por usuario (sin paginación para el modal de eliminación)
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<Receta>> getRecetasByUsuario(@PathVariable Long usuarioId) {
+        List<Receta> recetas = recetaRepository.findByUsuarioId(usuarioId, Pageable.unpaged()).getContent();
+        return ResponseEntity.ok(recetas);
     }
 
     // ✅ Crear nueva receta
@@ -69,5 +77,17 @@ public class RecetaController {
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ApiResponse(false, "Receta no encontrada"))); // ✅ también ResponseEntity<?>
+    }
+
+    // Eliminar receta
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarReceta(@PathVariable Long id) {
+        return recetaRepository.findById(id)
+                .<ResponseEntity<?>>map(receta -> {
+                    recetaRepository.deleteById(id);
+                    return ResponseEntity.ok(new ApiResponse(true, "Receta eliminada correctamente"));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse(false, "Receta no encontrada")));
     }
 }
