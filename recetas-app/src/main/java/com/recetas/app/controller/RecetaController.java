@@ -27,17 +27,13 @@ public class RecetaController {
     @Autowired
     private ImageService imageService;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     // ✅ Obtener todas las recetas (paginadas)
     @GetMapping
     public Page<Receta> getAllRecetas(Pageable pageable) {
         return recetaRepository.findAll(pageable);
-    }
-
-    // Obtener recetas por usuario (sin paginación para el modal de eliminación)
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Receta>> getRecetasByUsuario(@PathVariable Long usuarioId) {
-        List<Receta> recetas = recetaRepository.findByUsuarioId(usuarioId, Pageable.unpaged()).getContent();
-        return ResponseEntity.ok(recetas);
     }
 
     // ✅ Crear nueva receta
@@ -90,4 +86,55 @@ public class RecetaController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ApiResponse(false, "Receta no encontrada")));
     }
+
+    // Obtener recetas por usuario (sin paginación para el modal de eliminación)
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<Receta>> getRecetasByUsuario(@PathVariable Long usuarioId) {
+        List<Receta> recetas = recetaRepository.findByUsuarioId(usuarioId, Pageable.unpaged()).getContent();
+        return ResponseEntity.ok(recetas);
+    }
+
+    // Buscar recetas por usuario
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<ApiResponse<List<Receta>>> buscarRecetasPorUsuario(@PathVariable Long usuarioId,
+            @RequestParam String titulo) {
+        List<Receta> recetas = recetaRepository.findByUsuarioIdAndNombreContainingIgnoreCase(usuarioId, titulo);
+
+        if (recetas.isEmpty()) {
+            return ResponseEntity.ok(new ApiResponse<>(false, "No se encontraron recetas con ese título", recetas));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Recetas encontradas", recetas));
+    }
+
+    // Buscar recetas por título
+    @GetMapping("/buscar")
+    public ResponseEntity<ApiResponse<List<Receta>>> buscarRecetasEnPagina(@RequestParam String titulo) {
+        List<Receta> recetas = recetaRepository.findByNombreContainingIgnoreCase(titulo);
+
+        if (recetas.isEmpty()) {
+            return ResponseEntity.ok(new ApiResponse<>(false, "No se encontraron recetas", recetas));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Recetas encontradas", recetas));
+    }
+
+    // Buscar usuarios por nombre
+    @GetMapping("/buscar")
+    public ResponseEntity<ApiResponse<List<Receta>>> buscarRecetasPorAutor(@RequestParam String nombreAutor) {
+        List<Usuario> usuarios = usuarioRepository.findByNombreContainingIgnoreCase(nombreAutor);
+
+        if (usuarios.isEmpty()) {
+            return ResponseEntity.ok(new ApiResponse<>(false, "No se encontraron usuarios con ese nombre"));
+        }
+
+        // Traemos todas las recetas de los usuarios encontrados
+        List<Receta> recetas = usuarios.stream()
+                .flatMap(u -> recetaRepository.findByUsuarioId(u.getId()).stream())
+                .toList();
+
+        if (recetas.isEmpty()) {
+            return ResponseEntity.ok(new ApiResponse<>(false, "No se encontraron recetas para ese autor"));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Recetas encontradas", recetas));
+    }
+
 }
