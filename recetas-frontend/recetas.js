@@ -59,7 +59,7 @@ function validarFormularioReceta() {
 async function fetchRecetas(page = 0) {
     try {
         loading.classList.remove("hidden");
-        message.classList.add("hidden");
+        message.classList.add("hidden"); // Ocultar mensajes previos
 
         const response = await fetch(`${API_URL}?page=${page}&size=${pageSize}`);
         if (!response.ok) throw new Error("Error al cargar recetas");
@@ -81,14 +81,23 @@ async function fetchRecetas(page = 0) {
         }
 
         renderRecetas(recetas);
+
+        // Control del botón "Cargar más"
         if (data.last !== undefined) {
             loadMoreBtn.classList.toggle("hidden", data.last);
         }
 
+        // Si llegamos aquí, todo salió bien - asegurarse que no haya mensaje de error
+        message.classList.add("hidden");
+
     } catch (error) {
         console.error('Error al cargar recetas:', error);
-        message.textContent = "Error al cargar recetas";
-        message.classList.remove("hidden");
+
+        // Solo mostrar error si realmente falló Y no hay recetas en pantalla
+        if (page === 0 && recetasGrid.children.length === 0) {
+            message.textContent = "Error al cargar recetas. Por favor, intenta de nuevo.";
+            message.classList.remove("hidden");
+        }
     } finally {
         loading.classList.add("hidden");
     }

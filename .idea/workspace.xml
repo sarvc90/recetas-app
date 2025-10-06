@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.js" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,12 +32,12 @@
     &quot;assignee&quot;: &quot;Cel18&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/sarvc90/recetas-app.git",
-    "accountId": "f10011c8-4287-438a-82b4-65016593e5ed"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/sarvc90/recetas-app.git&quot;,
+    &quot;accountId&quot;: &quot;f10011c8-4287-438a-82b4-65016593e5ed&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
