@@ -7,9 +7,6 @@
     <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.html" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/recetas.js" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/recetas.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/styles-recetas.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,12 +32,12 @@
     &quot;assignee&quot;: &quot;Cel18&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/sarvc90/recetas-app.git&quot;,
-    &quot;accountId&quot;: &quot;d9d960eb-3cd7-4898-bc21-4d29bba7e69d&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/sarvc90/recetas-app.git",
+    "accountId": "f10011c8-4287-438a-82b4-65016593e5ed"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -92,8 +89,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.26775.15" />
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.26775.15" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
       </set>
     </attachedChunks>
   </component>
@@ -112,6 +109,7 @@
       <workItem from="1759454028188" duration="3318000" />
       <workItem from="1759538642494" duration="2829000" />
       <workItem from="1759541758149" duration="318000" />
+      <workItem from="1759760980428" duration="1289000" />
     </task>
     <servers />
   </component>
