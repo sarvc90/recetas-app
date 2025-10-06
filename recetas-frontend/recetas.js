@@ -414,3 +414,67 @@ async function eliminarRecetasSeleccionadas() {
     }
 }
 
+// ================== BÚSQUEDA ==================
+async function buscarRecetas() {
+    const searchInput = document.getElementById('searchInput');
+    const loading = document.getElementById('loading');
+    const message = document.getElementById('message');
+    const recetasGrid = document.getElementById('recetasGrid');
+    const loadMoreBtn = document.getElementById('loadMore');
+
+    if (!searchInput || !loading || !message || !recetasGrid) {
+        console.error('Elementos DOM no encontrados');
+        return;
+    }
+
+    const termino = searchInput.value.trim();
+
+    // Si el campo está vacío, mostrar todas las recetas
+    if (!termino) {
+        currentPage = 0;
+        await fetchRecetas();
+        return;
+    }
+
+    try {
+        loading.classList.remove('hidden');
+        message.classList.add('hidden');
+        recetasGrid.innerHTML = '';
+
+        const response = await fetch(`${API_URL}/buscar?termino=${encodeURIComponent(termino)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Error al buscar recetas');
+
+        const recetas = await response.json();
+
+        if (!recetas || recetas.length === 0) {
+            message.textContent = 'No se encontraron recetas que coincidan con tu búsqueda';
+            message.classList.remove('hidden');
+            loadMoreBtn?.classList.add('hidden');
+            return;
+        }
+
+        renderRecetas(recetas);
+        loadMoreBtn?.classList.add('hidden'); // Ocultar paginación en resultados de búsqueda
+
+    } catch (error) {
+        console.error('Error en la búsqueda:', error);
+        message.textContent = 'Error al realizar la búsqueda. Por favor, intenta de nuevo.';
+        message.classList.remove('hidden');
+    } finally {
+        loading.classList.add('hidden');
+    }
+}
+
+// Event listeners para la búsqueda
+document.getElementById('searchBtn')?.addEventListener('click', buscarRecetas);
+document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        buscarRecetas();
+    }
+});

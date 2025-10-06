@@ -445,6 +445,46 @@ button:hover {
     transform: none;
 }
 
+/* Estilos para la barra de búsqueda */
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #53b6ae;
+}
+
+.search-bar button {
+    padding: 12px 24px;
+    background: #53b6ae;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.search-bar button:hover {
+    background: #439d96;
+}
+
 /* Responsive para botones de acción */
 @media (max-width: 600px) {
     .action-buttons {
