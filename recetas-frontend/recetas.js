@@ -18,6 +18,7 @@ const message = document.getElementById("message");
 const modal = document.getElementById("modal");
 const closeModal = document.getElementById("closeModal");
 const modalTitle = document.getElementById("modalTitle");
+const modalDescription = document.getElementById("modalDescription");
 const modalImage = document.getElementById("modalImage");
 const modalIngredientes = document.getElementById("modalIngredientes");
 const modalInstrucciones = document.getElementById("modalInstrucciones");
@@ -165,6 +166,7 @@ function prepararFormularioEdicion(receta) {
 // ================== MODAL ==================
 function openModal(receta) {
     modalTitle.textContent = receta.nombre || "Receta sin nombre";
+    modalDescription.textContent = receta.descripcion || "Sin descripción";
     modalImage.src = receta.imagenUrl || "https://via.placeholder.com/500x300?text=Sin+Imagen";
 
     modalIngredientes.innerHTML = "";

@@ -132,6 +132,12 @@ button:hover {
     position: relative;
 }
 
+.modal-content > h3 {
+    color: #53b6ae;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
 .close {
     position: absolute;
     top: 10px;
