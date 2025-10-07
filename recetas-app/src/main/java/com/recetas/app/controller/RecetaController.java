@@ -140,4 +140,15 @@ public class RecetaController {
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Recetas encontradas", recetas));
     }
+
+    // ✅ Buscar recetas por término general (compatible con /buscar?termino=)
+    @GetMapping("/buscar")
+    public ResponseEntity<ApiResponse<List<Receta>>> buscarRecetasPorTermino(@RequestParam String termino) {
+        List<Receta> recetas = recetaRepository.findByNombreContainingIgnoreCase(termino);
+
+        if (recetas.isEmpty()) {
+            return ResponseEntity.ok(new ApiResponse<>(false, "No se encontraron recetas", recetas));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Recetas encontradas", recetas));
+    }
 }

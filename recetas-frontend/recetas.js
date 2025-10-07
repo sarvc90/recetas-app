@@ -4,13 +4,14 @@ const API_BASE_URL = "http://localhost:8080/api";
 const pageSize = 6;
 let currentPage = 0;
 let selectedRecetasToDelete = new Set();
+
+// Botones y elementos principales
 const deleteRecipesBtn = document.getElementById('deleteRecipesBtn');
 const deleteModal = document.getElementById('deleteModal');
 const closeDeleteModal = document.getElementById('closeDeleteModal');
 const deleteList = document.getElementById('deleteList');
 const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-
 const recetasGrid = document.getElementById("recetasGrid");
 const loading = document.getElementById("loading");
 const message = document.getElementById("message");
@@ -26,15 +27,19 @@ const newRecipeForm = document.getElementById('newRecipeForm');
 const cancelRecipeBtn = document.getElementById('cancelRecipeBtn');
 const imageInput = document.getElementById('recipeImage');
 const imagePreview = document.getElementById('imagePreview');
-const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+const loadMoreBtn = document.getElementById("loadMore");
 
 // ================== EVENT LISTENERS ==================
 closeModal?.addEventListener("click", () => modal.classList.add("hidden"));
+
 loadMoreBtn?.addEventListener("click", () => {
     currentPage++;
     fetchRecetas(currentPage);
 });
+
 addRecipeBtn?.addEventListener('click', () => recipeForm.classList.remove('hidden'));
+
 cancelRecipeBtn?.addEventListener('click', () => {
     recipeForm.classList.add('hidden');
     newRecipeForm.reset();
@@ -450,7 +455,9 @@ async function buscarRecetas() {
 
         if (!response.ok) throw new Error('Error al buscar recetas');
 
-        const recetas = await response.json();
+        const data = await response.json();
+        const recetas = data.data || [];
+
 
         if (!recetas || recetas.length === 0) {
             message.textContent = 'No se encontraron recetas que coincidan con tu búsqueda';
