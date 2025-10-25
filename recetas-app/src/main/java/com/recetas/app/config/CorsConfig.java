@@ -16,6 +16,7 @@ public class CorsConfig {
 
         // Permitir solicitudes desde cualquier origen
         config.addAllowedOrigin("http://localhost:63342");
+        config.addAllowedOrigin("http://localhost:63343");
 
         // Permitir todos los headers
         config.addAllowedHeader("*");

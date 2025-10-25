@@ -11,10 +11,9 @@
     <h1>El Rincón de los Sabores</h1>
 
     <div class="content-section">
-        <!-- Botón para agregar receta y borrar receta-->
+        <!-- Botón para agregar receta -->
         <div class="action-buttons">
             <button id="addRecipeBtn" class="primary-btn">Agregar Nueva Receta</button>
-            <button id="deleteRecipesBtn" class="delete-mode-btn">Eliminar Mis Recetas</button>
         </div>
 
         <!-- Barra de búsqueda -->
@@ -76,7 +75,7 @@
     <div class="modal-content">
         <span id="closeModal" class="close">&times;</span>
         <h2 id="modalTitle"></h2>
-            <h3 id="modalDescription"></h3>
+        <h3 id="modalDescription"></h3>
         <img id="modalImage" alt="Imagen receta">
         <button id="favBtn" class="fav-btn">🤍 Agregar a Favoritos</button>
         <div class="modal-info">
@@ -84,19 +83,6 @@
             <ul id="modalIngredientes"></ul>
             <h3>Instrucciones</h3>
             <p id="modalInstrucciones"></p>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de eliminación -->
-<div id="deleteModal" class="modal hidden delete-modal">
-    <div class="modal-content">
-        <span id="closeDeleteModal" class="close">&times;</span>
-        <h3>Selecciona las recetas que deseas eliminar</h3>
-        <div id="deleteList" class="delete-list"></div>
-        <div class="delete-actions">
-            <button class="cancel-btn" id="cancelDeleteBtn">Cancelar</button>
-            <button class="confirm-delete-btn" id="confirmDeleteBtn" disabled>Eliminar Seleccionadas</button>
         </div>
     </div>
 </div>

@@ -38,6 +38,40 @@
   </div>
 </div>
 
+<!-- Modal de edición -->
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <span id="closeEditModal" class="close">&times;</span>
+    <h2>Editar Receta</h2>
+    <form id="editForm">
+      <div class="form-group">
+        <label for="editRecipeName">Nombre de la receta:</label>
+        <input type="text" id="editRecipeName" required>
+      </div>
+      <div class="form-group">
+        <label for="editRecipeDescription">Descripción:</label>
+        <textarea id="editRecipeDescription" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="editRecipeImage">Cambiar imagen (opcional):</label>
+        <input type="file" id="editRecipeImage" accept="image/*">
+        <div id="editImagePreview" class="image-preview"></div>
+      </div>
+      <div class="form-group">
+        <label for="editRecipeIngredients">Ingredientes (uno por línea):</label>
+        <textarea id="editRecipeIngredients" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="editRecipeInstructions">Instrucciones:</label>
+        <textarea id="editRecipeInstructions" required></textarea>
+      </div>
+      <div class="form-buttons">
+        <button type="submit" class="submit-btn">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="mis-recetas.js"></script>
 </body>
 </html>

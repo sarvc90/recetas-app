@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Favoritos - El Rincón de los Sabores</title>
+    <link rel="stylesheet" href="styles-favoritos.css">
+</head>
+<body>
+<div class="container">
+    <h1>Mis Recetas Favoritas</h1>
+
+    <div class="content-section">
+        <div class="header-actions">
+            <a href="recetas.html" class="back-btn">⬅ Volver a todas las recetas</a>
+        </div>
+
+        <div id="message" class="hidden"></div>
+        <div id="loading" class="hidden">Cargando tus favoritos...</div>
+
+        <div id="favoritosGrid" class="grid"></div>
+    </div>
+</div>
+
+<!-- Modal de detalle -->
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <h3 id="modalDescription"></h3>
+        <img id="modalImage" alt="Imagen receta">
+        <button id="favBtn" class="fav-btn">❤️ Quitar de Favoritos</button>
+        <div class="modal-info">
+            <h3>Ingredientes</h3>
+            <ul id="modalIngredientes"></ul>
+            <h3>Instrucciones</h3>
+            <p id="modalInstrucciones"></p>
+        </div>
+    </div>
+</div>
+
+<script src="favoritos.js"></script>
+</body>
+</html>

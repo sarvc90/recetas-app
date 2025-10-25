@@ -91,6 +91,7 @@ h1 {
     display: flex;
     justify-content: space-around;
     padding: 10px;
+    gap: 10px;
 }
 
 .edit-btn, .delete-btn {
@@ -102,6 +103,7 @@ h1 {
     font-weight: bold;
     cursor: pointer;
     transition: background 0.3s;
+    flex: 1;
 }
 
 .edit-btn:hover {
@@ -150,8 +152,13 @@ h1 {
     color: white;
     border-radius: 50%;
     font-size: 22px;
-    padding: 5px 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
+    z-index: 1000;
 }
 
 .close:hover {
@@ -169,21 +176,113 @@ h1 {
 
 .modal-info h3 {
     color: #53b6ae;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .modal-info ul {
     background: #f8f9fa;
     padding: 10px;
     border-radius: 6px;
-    margin: 5px 0 15px 0;
+    margin: 10px 0 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 #modalInstrucciones {
     background: #f8f9fa;
-    padding: 10px;
+    padding: 15px;
     border-radius: 6px;
     white-space: pre-line;
+    max-height: 300px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+/* Formulario de edición */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e3eef3;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.image-preview {
+    margin-top: 10px;
+    max-width: 300px;
+}
+
+.image-preview img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.submit-btn {
+    background: #53b6ae;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #439d96;
+}
+
+/* Scrollbar */
+.modal-content::-webkit-scrollbar,
+.modal-info ul::-webkit-scrollbar,
+#modalInstrucciones::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.modal-info ul::-webkit-scrollbar-track,
+#modalInstrucciones::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.modal-info ul::-webkit-scrollbar-thumb,
+#modalInstrucciones::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.modal-info ul::-webkit-scrollbar-thumb:hover,
+#modalInstrucciones::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* Mensajes */
@@ -196,4 +295,37 @@ h1 {
 
 .hidden {
     display: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .content-section {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    #modalImage {
+        max-height: 300px;
+    }
+
+    .card-actions {
+        flex-direction: column;
+    }
 }

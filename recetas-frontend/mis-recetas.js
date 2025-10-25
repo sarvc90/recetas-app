@@ -1,4 +1,5 @@
 const API_URL = "http://localhost:8080/api/recetas";
+const API_BASE_URL = "http://localhost:8080/api";
 const grid = document.getElementById("misRecetasGrid");
 const loading = document.getElementById("loading");
 const message = document.getElementById("message");
@@ -12,7 +13,15 @@ const modalImage = document.getElementById("modalImage");
 const modalIngredientes = document.getElementById("modalIngredientes");
 const modalInstrucciones = document.getElementById("modalInstrucciones");
 
+// Modal de edición
+const editModal = document.getElementById("editModal");
+const closeEditModal = document.getElementById("closeEditModal");
+const editForm = document.getElementById("editForm");
+const editImageInput = document.getElementById("editRecipeImage");
+const editImagePreview = document.getElementById("editImagePreview");
+
 closeModal?.addEventListener("click", () => modal.classList.add("hidden"));
+closeEditModal?.addEventListener("click", () => editModal.classList.add("hidden"));
 
 // ================== INICIALIZACIÓN ==================
 document.addEventListener("DOMContentLoaded", async () => {
@@ -64,28 +73,35 @@ function renderMisRecetas(recetas) {
                  alt="${receta.nombre}">
             <h3>${receta.nombre}</h3>
             <div class="card-actions">
-                <button class="edit-btn">✏️ Editar</button>
-                <button class="delete-btn">🗑 Eliminar</button>
+                <button class="edit-btn" data-id="${receta.id}">✏️ Editar</button>
+                <button class="delete-btn" data-id="${receta.id}">🗑 Eliminar</button>
             </div>
         `;
 
+        // Botón editar
         card.querySelector(".edit-btn").addEventListener("click", (e) => {
             e.stopPropagation();
-            window.location.href = `recetas.html?edit=${receta.id}`;
+            abrirModalEdicion(receta);
         });
 
+        // Botón eliminar
         card.querySelector(".delete-btn").addEventListener("click", (e) => {
             e.stopPropagation();
             eliminarReceta(receta.id, card);
         });
 
-        card.addEventListener("click", () => abrirModal(receta));
+        // Click en la tarjeta para ver detalles
+        card.addEventListener("click", (e) => {
+            if (!e.target.classList.contains('edit-btn') && !e.target.classList.contains('delete-btn')) {
+                abrirModal(receta);
+            }
+        });
 
         grid.appendChild(card);
     });
 }
 
-// ================== MODAL ==================
+// ================== MODAL DE DETALLE ==================
 function abrirModal(receta) {
     modalTitle.textContent = receta.nombre;
     modalDescription.textContent = receta.descripcion;
@@ -93,18 +109,121 @@ function abrirModal(receta) {
 
     modalIngredientes.innerHTML = "";
     const ingredientes = typeof receta.ingredientes === "string"
-        ? receta.ingredientes.split("\n")
+        ? receta.ingredientes.split("\n").filter(ing => ing.trim() !== '')
         : receta.ingredientes;
 
     ingredientes.forEach(ing => {
         const li = document.createElement("li");
-        li.textContent = ing;
+        li.textContent = ing.trim();
         modalIngredientes.appendChild(li);
     });
 
     modalInstrucciones.textContent = receta.instrucciones || "Sin instrucciones";
     modal.classList.remove("hidden");
 }
+
+// ================== MODAL DE EDICIÓN ==================
+function abrirModalEdicion(receta) {
+    document.getElementById('editRecipeName').value = receta.nombre;
+    document.getElementById('editRecipeDescription').value = receta.descripcion;
+    document.getElementById('editRecipeIngredients').value = typeof receta.ingredientes === "string"
+        ? receta.ingredientes
+        : receta.ingredientes.join('\n');
+    document.getElementById('editRecipeInstructions').value = receta.instrucciones;
+
+    // Mostrar imagen actual
+    if (receta.imagenUrl) {
+        editImagePreview.innerHTML = `<img src="${receta.imagenUrl}" alt="Preview">`;
+    } else {
+        editImagePreview.innerHTML = '';
+    }
+
+    // Guardar ID de la receta
+    editForm.dataset.recetaId = receta.id;
+    editForm.dataset.imagenActual = receta.imagenUrl || '';
+
+    editModal.classList.remove("hidden");
+}
+
+// ================== GUARDAR EDICIÓN ==================
+editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const recetaId = editForm.dataset.recetaId;
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+    try {
+        const datos = {
+            nombre: document.getElementById('editRecipeName').value.trim(),
+            descripcion: document.getElementById('editRecipeDescription').value.trim(),
+            ingredientes: document.getElementById('editRecipeIngredients').value.trim(),
+            instrucciones: document.getElementById('editRecipeInstructions').value.trim(),
+            usuarioId: usuario.id
+        };
+
+        // Validar campos
+        if (!datos.nombre || !datos.descripcion || !datos.ingredientes || !datos.instrucciones) {
+            throw new Error('Todos los campos son obligatorios');
+        }
+
+        // Subir nueva imagen si se seleccionó
+        if (editImageInput.files[0]) {
+            const formData = new FormData();
+            formData.append('file', editImageInput.files[0]);
+
+            const imageResponse = await fetch(`${API_BASE_URL}/recetas/upload-image`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!imageResponse.ok) throw new Error("Error al subir la imagen");
+            const imageData = await imageResponse.json();
+            datos.imagenUrl = imageData.url;
+        } else {
+            // Mantener imagen actual
+            datos.imagenUrl = editForm.dataset.imagenActual;
+        }
+
+        // Actualizar receta
+        const response = await fetch(`${API_URL}/${recetaId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+
+        if (!response.ok) throw new Error('Error al actualizar la receta');
+
+        // Cerrar modal
+        editModal.classList.add('hidden');
+        editForm.reset();
+        editImagePreview.innerHTML = '';
+
+        // Recargar recetas
+        await cargarMisRecetas(usuario.id);
+
+        // Mostrar mensaje de éxito
+        message.textContent = '✅ Receta actualizada correctamente';
+        message.classList.remove('hidden');
+        setTimeout(() => message.classList.add('hidden'), 3000);
+
+    } catch (error) {
+        console.error(error);
+        message.textContent = '❌ Error: ' + error.message;
+        message.classList.remove('hidden');
+    }
+});
+
+// Preview de imagen al editar
+editImageInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            editImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
 // ================== ELIMINAR RECETA ==================
 async function eliminarReceta(id, card) {
