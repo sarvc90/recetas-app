@@ -184,6 +184,12 @@ function openModal(receta) {
     });
 
     modalInstrucciones.textContent = receta.instrucciones || "No disponibles";
+    recetaActual = receta;
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (usuario) {
+        verificarFavorito(usuario.id, receta.id);
+    }
+
     modal.classList.remove("hidden");
 }
 
@@ -479,6 +485,34 @@ async function buscarRecetas() {
         loading.classList.add('hidden');
     }
 }
+const favBtn = document.getElementById("favBtn");
+let esFavorito = false;
+let recetaActual = null;
+
+async function verificarFavorito(usuarioId, recetaId) {
+    const res = await fetch(`http://localhost:8080/api/favoritos/usuario/${usuarioId}/receta/${recetaId}`);
+    const data = await res.json();
+    esFavorito = data.data;
+    actualizarIconoFav();
+}
+
+function actualizarIconoFav() {
+    favBtn.textContent = esFavorito ? "❤️ Quitar de Favoritos" : "🤍 Agregar a Favoritos";
+}
+
+favBtn.addEventListener("click", async () => {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario) return alert("Inicia sesión para usar favoritos");
+
+    const res = await fetch(`http://localhost:8080/api/favoritos/toggle?usuarioId=${usuario.id}&recetaId=${recetaActual.id}`, {
+        method: "POST"
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    esFavorito = !esFavorito;
+    actualizarIconoFav();
+});
 
 // Event listeners para la búsqueda
 document.getElementById('searchBtn')?.addEventListener('click', buscarRecetas);
