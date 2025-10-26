@@ -3,6 +3,8 @@ const API_URL = "http://localhost:8080/api/recetas";
 const API_BASE_URL = "http://localhost:8080/api";
 const pageSize = 6;
 let currentPage = 0;
+let selectedRating = 0;
+let currentRecetaId = null;
 
 // Botones y elementos principales
 const recetasGrid = document.getElementById("recetasGrid");
@@ -28,8 +30,20 @@ const favBtn = document.getElementById("favBtn");
 let esFavorito = false;
 let recetaActual = null;
 
+// Variables de comentarios
+const commentsList = document.getElementById("commentsList");
+const commentText = document.getElementById("commentText");
+const submitCommentBtn = document.getElementById("submitComment");
+const starsInput = document.querySelectorAll(".star");
+const selectedRatingText = document.getElementById("selectedRating");
+const ratingStars = document.getElementById("ratingStars");
+const ratingText = document.getElementById("ratingText");
+
 // ================== EVENT LISTENERS ==================
-closeModal?.addEventListener("click", () => modal.classList.add("hidden"));
+closeModal?.addEventListener("click", () => {
+    modal.classList.add("hidden");
+    resetCommentForm();
+});
 
 loadMoreBtn?.addEventListener("click", () => {
     currentPage++;
@@ -66,6 +80,218 @@ favBtn?.addEventListener("click", async () => {
     esFavorito = !esFavorito;
     actualizarIconoFav();
 });
+
+// Event listeners para las estrellas de calificación
+starsInput.forEach(star => {
+    star.addEventListener("click", () => {
+        selectedRating = parseInt(star.dataset.rating);
+        updateStarsInput();
+    });
+
+    star.addEventListener("mouseenter", () => {
+        const rating = parseInt(star.dataset.rating);
+        highlightStars(rating);
+    });
+});
+
+document.querySelector(".stars-input")?.addEventListener("mouseleave", () => {
+    updateStarsInput();
+});
+
+// Event listener para enviar comentario
+submitCommentBtn?.addEventListener("click", async () => {
+    await submitComment();
+});
+
+// ================== FUNCIONES DE COMENTARIOS ==================
+
+function updateStarsInput() {
+    starsInput.forEach(star => {
+        const rating = parseInt(star.dataset.rating);
+        star.textContent = rating <= selectedRating ? "★" : "☆";
+        star.classList.toggle("active", rating <= selectedRating);
+    });
+    selectedRatingText.textContent = selectedRating > 0
+        ? `${selectedRating} ${selectedRating === 1 ? 'estrella' : 'estrellas'}`
+        : "No seleccionada";
+}
+
+function highlightStars(rating) {
+    starsInput.forEach(star => {
+        const starRating = parseInt(star.dataset.rating);
+        star.textContent = starRating <= rating ? "★" : "☆";
+    });
+}
+
+function resetCommentForm() {
+    selectedRating = 0;
+    if (commentText) commentText.value = "";
+    updateStarsInput();
+}
+
+async function cargarComentarios(recetaId) {
+    try {
+        const response = await fetch(`${API_URL}/${recetaId}/comentarios`);
+        if (!response.ok) throw new Error("Error al cargar comentarios");
+
+        const data = await response.json();
+
+        if (data.success) {
+            const { comentarios, promedioCalificacion, totalComentarios } = data.data;
+
+            // Actualizar display de calificación
+            mostrarCalificacionPromedio(promedioCalificacion, totalComentarios);
+
+            // Mostrar comentarios
+            if (comentarios && comentarios.length > 0) {
+                renderComentarios(comentarios);
+            } else {
+                commentsList.innerHTML = '<p class="no-comments">Sé el primero en comentar esta receta</p>';
+            }
+        }
+    } catch (error) {
+        console.error("Error al cargar comentarios:", error);
+        if (commentsList) {
+            commentsList.innerHTML = '<p class="no-comments">Error al cargar comentarios</p>';
+        }
+    }
+}
+
+function mostrarCalificacionPromedio(promedio, total) {
+    const estrellas = Math.round(promedio);
+    let estrellasHTML = "";
+
+    for (let i = 1; i <= 5; i++) {
+        estrellasHTML += i <= estrellas ? "★" : "☆";
+    }
+
+    if (ratingStars) ratingStars.textContent = estrellasHTML;
+    if (ratingText) {
+        ratingText.textContent = total > 0
+            ? `${promedio.toFixed(1)} / 5 (${total} ${total === 1 ? 'calificación' : 'calificaciones'})`
+            : "Sin calificaciones";
+    }
+}
+
+function renderComentarios(comentarios) {
+    if (!comentarios || comentarios.length === 0) {
+        if (commentsList) {
+            commentsList.innerHTML = '<p class="no-comments">Sé el primero en comentar esta receta</p>';
+        }
+        return;
+    }
+
+    if (commentsList) {
+        commentsList.innerHTML = comentarios.map(comentario => {
+            const fecha = new Date(comentario.fechaCreacion);
+            const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            let estrellasComentario = "";
+            for (let i = 1; i <= 5; i++) {
+                estrellasComentario += i <= comentario.calificacion ? "★" : "☆";
+            }
+
+            return `
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-author">${comentario.nombreUsuario}</span>
+                        <span class="comment-rating">${estrellasComentario}</span>
+                    </div>
+                    <p class="comment-text">${comentario.texto}</p>
+                    <span class="comment-date">${fechaFormateada}</span>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+async function submitComment() {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+    if (!usuario) {
+        alert("Debes iniciar sesión para comentar");
+        return;
+    }
+
+    if (selectedRating === 0) {
+        alert("Por favor selecciona una calificación");
+        return;
+    }
+
+    const texto = commentText ? commentText.value.trim() : "";
+    if (!texto) {
+        alert("Por favor escribe un comentario");
+        return;
+    }
+
+    try {
+        if (submitCommentBtn) {
+            submitCommentBtn.disabled = true;
+            submitCommentBtn.textContent = "Publicando...";
+        }
+
+        const response = await fetch(`${API_URL}/${currentRecetaId}/comentarios`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                usuarioId: usuario.id,
+                texto: texto,
+                calificacion: selectedRating
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("✅ Comentario publicado correctamente");
+            resetCommentForm();
+            await cargarComentarios(currentRecetaId);
+
+            // Ocultar formulario después de comentar
+            const commentForm = document.getElementById("commentForm");
+            if (commentForm) commentForm.style.display = "none";
+        } else {
+            alert("❌ " + data.message);
+        }
+
+    } catch (error) {
+        console.error("Error al publicar comentario:", error);
+        alert("❌ Error al publicar el comentario");
+    } finally {
+        if (submitCommentBtn) {
+            submitCommentBtn.disabled = false;
+            submitCommentBtn.textContent = "Publicar Comentario";
+        }
+    }
+}
+
+async function verificarSiYaComento(recetaId, usuarioId) {
+    try {
+        const response = await fetch(`${API_URL}/${recetaId}/comentarios/verificar?usuarioId=${usuarioId}`);
+        const data = await response.json();
+
+        const commentForm = document.getElementById("commentForm");
+        if (commentForm) {
+            if (data.data === true) {
+                // Ya comentó - ocultar formulario
+                commentForm.style.display = "none";
+            } else {
+                // No ha comentado - mostrar formulario
+                commentForm.style.display = "block";
+            }
+        }
+    } catch (error) {
+        console.error("Error al verificar comentario:", error);
+    }
+}
 
 // ================== VALIDAR FORMULARIO ==================
 function validarFormularioReceta() {
@@ -166,10 +392,22 @@ function openModal(receta) {
 
     modalInstrucciones.textContent = receta.instrucciones || "No disponibles";
     recetaActual = receta;
+    currentRecetaId = receta.id;
+
     const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (usuario) {
         verificarFavorito(usuario.id, receta.id);
+        verificarSiYaComento(receta.id, usuario.id);
+    } else {
+        const commentForm = document.getElementById("commentForm");
+        if (commentForm) commentForm.style.display = "none";
     }
+
+    // Cargar comentarios
+    cargarComentarios(receta.id);
+
+    // Resetear formulario de comentarios
+    resetCommentForm();
 
     modal.classList.remove("hidden");
 }

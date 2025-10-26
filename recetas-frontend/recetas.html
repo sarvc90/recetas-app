@@ -75,6 +75,15 @@
     <div class="modal-content">
         <span id="closeModal" class="close">&times;</span>
         <h2 id="modalTitle"></h2>
+
+        <!-- Sección de calificación -->
+        <div class="rating-section">
+            <div class="rating-display">
+                <span class="rating-stars" id="ratingStars">☆☆☆☆☆</span>
+                <span class="rating-text" id="ratingText">Sin calificaciones</span>
+            </div>
+        </div>
+
         <h3 id="modalDescription"></h3>
         <img id="modalImage" alt="Imagen receta">
         <button id="favBtn" class="fav-btn">🤍 Agregar a Favoritos</button>
@@ -83,6 +92,34 @@
             <ul id="modalIngredientes"></ul>
             <h3>Instrucciones</h3>
             <p id="modalInstrucciones"></p>
+        </div>
+
+        <!-- Sección de comentarios -->
+        <div class="comments-section">
+            <h3>Comentarios y Calificaciones</h3>
+
+            <!-- Formulario para agregar comentario -->
+            <div id="commentForm" class="comment-form">
+                <h4>Deja tu comentario</h4>
+                <div class="rating-input">
+                    <label>Tu calificación:</label>
+                    <div class="stars-input">
+                        <span class="star" data-rating="1">☆</span>
+                        <span class="star" data-rating="2">☆</span>
+                        <span class="star" data-rating="3">☆</span>
+                        <span class="star" data-rating="4">☆</span>
+                        <span class="star" data-rating="5">☆</span>
+                    </div>
+                    <span id="selectedRating" class="selected-rating">No seleccionada</span>
+                </div>
+                <textarea id="commentText" placeholder="Escribe tu comentario aquí..." rows="4"></textarea>
+                <button id="submitComment" class="submit-comment-btn">Publicar Comentario</button>
+            </div>
+
+            <!-- Lista de comentarios -->
+            <div id="commentsList" class="comments-list">
+                <p class="no-comments">Cargando comentarios...</p>
+            </div>
         </div>
     </div>
 </div>

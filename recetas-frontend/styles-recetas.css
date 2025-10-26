@@ -586,3 +586,247 @@ button:hover {
         align-items: flex-start;
     }
 }
+
+/* ================== ESTILOS PARA COMENTARIOS Y CALIFICACIONES ================== */
+
+/* Sección de calificación general */
+.rating-section {
+    text-align: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.rating-stars {
+    font-size: 28px;
+    color: #ffa500;
+    letter-spacing: 3px;
+}
+
+.rating-text {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Sección de comentarios */
+.comments-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e3eef3;
+}
+
+.comments-section > h3 {
+    color: #53b6ae;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+/* Formulario de comentarios */
+.comment-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.comment-form h4 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.rating-input {
+    margin-bottom: 15px;
+}
+
+.rating-input label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+}
+
+.stars-input {
+    display: inline-flex;
+    gap: 5px;
+    margin-right: 10px;
+}
+
+.star {
+    font-size: 32px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #ffa500;
+    transform: scale(1.1);
+}
+
+.selected-rating {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e3eef3;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Playfair Display', serif;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.3s ease;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #53b6ae;
+}
+
+.submit-comment-btn {
+    background: #53b6ae;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.submit-comment-btn:hover {
+    background: #439d96;
+    transform: translateY(-2px);
+}
+
+.submit-comment-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Lista de comentarios */
+.comments-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.no-comments {
+    text-align: center;
+    color: #999;
+    padding: 30px;
+    font-style: italic;
+}
+
+.comment-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e3eef3;
+    transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #53b6ae;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #53b6ae;
+    font-size: 16px;
+}
+
+.comment-rating {
+    color: #ffa500;
+    font-size: 18px;
+    letter-spacing: 2px;
+}
+
+.comment-text {
+    color: #333;
+    line-height: 1.6;
+    margin: 10px 0;
+    white-space: pre-line;
+}
+
+.comment-date {
+    font-size: 12px;
+    color: #999;
+    display: block;
+    margin-top: 8px;
+}
+
+/* Scrollbar personalizado para comentarios */
+.comments-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background: #53b6ae;
+    border-radius: 4px;
+}
+
+.comments-list::-webkit-scrollbar-thumb:hover {
+    background: #439d96;
+}
+
+/* Responsive para comentarios */
+@media (max-width: 600px) {
+    .rating-stars {
+        font-size: 24px;
+    }
+
+    .star {
+        font-size: 28px;
+    }
+
+    .comment-form {
+        padding: 15px;
+    }
+
+    .comment-item {
+        padding: 12px;
+    }
+
+    .comment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .submit-comment-btn {
+        width: 100%;
+    }
+}
