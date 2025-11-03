@@ -4,11 +4,13 @@ public class UsuarioResponse {
     private Long id;
     private String nombre;
     private String email;
+    private String fotoPerfil;
 
-    public UsuarioResponse(Long id, String nombre, String email) {
+    public UsuarioResponse(Long id, String nombre, String email, String fotoPerfil) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
+        this.fotoPerfil = fotoPerfil;
     }
 
     // Getters y Setters
@@ -20,4 +22,7 @@ public class UsuarioResponse {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 }

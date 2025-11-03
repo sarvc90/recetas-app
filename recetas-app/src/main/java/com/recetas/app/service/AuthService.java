@@ -41,7 +41,8 @@ public class AuthService {
             UsuarioResponse usuarioResponse = new UsuarioResponse(
                     usuario.getId(),
                     usuario.getNombre(),
-                    usuario.getEmail()
+                    usuario.getEmail(),
+                    usuario.getFotoPerfil()
             );
 
             return new ApiResponse<>(true, "Login exitoso", usuarioResponse);
@@ -73,7 +74,8 @@ public class AuthService {
             UsuarioResponse usuarioResponse = new UsuarioResponse(
                     usuarioGuardado.getId(),
                     usuarioGuardado.getNombre(),
-                    usuarioGuardado.getEmail()
+                    usuarioGuardado.getEmail(),
+                    usuarioGuardado.getFotoPerfil()
             );
 
             return new ApiResponse<>(true, "Usuario registrado exitosamente", usuarioResponse);

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Editar Perfil - El Rincón de los Sabores</title>
+        <link rel="stylesheet" href="styles-editar-perfil.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Editar Mi Perfil</h1>
+
+            <div class="content-section">
+                <div class="header-actions">
+                    <a href="recetas.html" class="back-btn"
+                        >⬅ Volver a recetas</a
+                    >
+                </div>
+
+                <div id="message" class="hidden"></div>
+                <div id="loading" class="hidden">Cargando perfil...</div>
+
+                <form id="editarPerfilForm" class="perfil-form">
+                    <div class="foto-perfil-section">
+                        <div class="foto-placeholder">
+                            <img
+                                src="icon.png"
+                                alt="Usuario"
+                                style="
+                                    width: 50%;
+                                    height: 50%;
+                                    object-fit: cover;
+                                "
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="fotoPerfil"
+                                >Cambiar foto de perfil</label
+                            >
+                            <input
+                                type="file"
+                                id="fotoPerfil"
+                                accept="image/*"
+                            />
+                            <small>Formatos: JPG, PNG, GIF (máx. 5MB)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombre">Nombre completo</label>
+                        <input
+                            type="text"
+                            id="nombre"
+                            required
+                            placeholder="Tu nombre completo"
+                        />
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="submit-btn">
+                            Guardar cambios
+                        </button>
+                        <button
+                            type="button"
+                            class="cancel-btn"
+                            onclick="window.history.back()"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script src="editar-perfil.js"></script>
+    </body>
+</html>

@@ -26,6 +26,10 @@ public class Usuario {
     @Column(nullable = false, length = 255)
     private String password;
 
+    // La foto del usuario es opcional
+    @Column(name = "foto_perfil", length = 500)
+    private String fotoPerfil;
+
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
@@ -57,6 +61,9 @@ public class Usuario {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
