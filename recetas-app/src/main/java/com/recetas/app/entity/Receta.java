@@ -21,11 +21,11 @@ public class Receta {
     private String descripcion;
 
     @NotBlank(message = "Los ingredientes son obligatorios")
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String ingredientes;
 
     @NotBlank(message = "Las instrucciones son obligatorias")
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String instrucciones;
 
     @Column(name = "imagen_url", length = 500)

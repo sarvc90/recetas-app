@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="Agregar a favoritos completado, editar y eliminar en ver recetas propios.">
-      <change afterPath="$PROJECT_DIR$/recetas-frontend/editar-perfil.js" afterDir="false" />
+    <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="Editar Perfil ya funcional. Se integran los cambios correctamente.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/dto/EditarUsuarioRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/dto/EditarUsuarioRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/dto/UsuarioResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/dto/UsuarioResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/editarPerfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/editar-perfil.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-frontend/editarPerfil.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/entity/Comentario.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/entity/Comentario.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/entity/Receta.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/entity/Receta.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" afterDir="false" />
     </list>
     <list id="1cf64500-a4fa-482d-b534-e3b16b708825" name="Changes by Angie" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -126,7 +124,7 @@
       <workItem from="1762273040145" duration="3000" />
       <workItem from="1762286372157" duration="17000" />
       <workItem from="1762297200643" duration="638000" />
-      <workItem from="1762312230824" duration="3233000" />
+      <workItem from="1762312230824" duration="6290000" />
     </task>
     <task id="LOCAL-00001" summary="ver recetas propias">
       <option name="closed" value="true" />
@@ -144,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761366972417</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Editar Perfil ya funcional. Se integran los cambios correctamente.">
+      <option name="closed" value="true" />
+      <created>1762316325486</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1762316325486</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -164,6 +170,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="ver recetas propias" />
     <MESSAGE value="Agregar a favoritos completado, editar y eliminar en ver recetas propios." />
-    <option name="LAST_COMMIT_MESSAGE" value="Agregar a favoritos completado, editar y eliminar en ver recetas propios." />
+    <MESSAGE value="Editar Perfil ya funcional. Se integran los cambios correctamente." />
+    <option name="LAST_COMMIT_MESSAGE" value="Editar Perfil ya funcional. Se integran los cambios correctamente." />
   </component>
 </project>

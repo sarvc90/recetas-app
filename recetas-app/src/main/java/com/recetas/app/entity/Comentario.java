@@ -24,7 +24,7 @@ public class Comentario {
     private Long usuarioId;
 
     @NotBlank(message = "El comentario no puede estar vacío")
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String texto;
 
     @NotNull(message = "La calificación es obligatoria")
