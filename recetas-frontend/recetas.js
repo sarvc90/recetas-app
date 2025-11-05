@@ -573,25 +573,42 @@ async function buscarRecetas() {
 
 // ================== INICIALIZACIÓN ==================
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("Iniciando aplicación...");
+    console.log("Iniciando aplicación...");
 
-  const usuario = localStorage.getItem("usuario");
-  if (!usuario) {
-    window.location.href = "index.html";
-    return;
-  }
+    const usuario = localStorage.getItem("usuario");
+    if (!usuario) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    const usuarioData = JSON.parse(usuario);
+    const fotoPerfil = usuarioData.fotoPerfil || localStorage.getItem("usuarioFoto");
 
     const container = document.querySelector(".container");
     if (container) {
         const header = document.createElement("div");
         header.className = "header";
+
+        // Crear elemento de imagen de perfil
+        let fotoHTML = '';
+        if (fotoPerfil) {
+            fotoHTML = `<img src="${fotoPerfil}" alt="Foto de perfil" class="user-photo">`;
+        } else {
+            fotoHTML = `<div class="user-photo-placeholder">
+                    <img src="icon.png" alt="Usuario" style="width: 70%; height: 70%; object-fit: cover;">
+                  </div>`;
+        }
+
         header.innerHTML = `
             <div class="user-info">
-                <span>Bienvenido, ${JSON.parse(usuario).nombre}</span>
+                <div class="user-profile">
+                    ${fotoHTML}
+                    <span class="user-name">Bienvenido, ${usuarioData.nombre}</span>
+                </div>
                 <div class="nav-buttons">
                     <a href="mis-recetas.html" class="nav-btn">Mis Recetas</a>
                     <a href="favoritos.html" class="nav-btn">❤️ Favoritos</a>
-                    <a href="editarPerfil.html" class="nav-btn">✏️ Editar perfil</a>
+                    <a href="editar-perfil.html" class="nav-btn">✏️ Editar perfil</a>
                     <button id="logout" class="logout-btn">Cerrar Sesión</button>
                 </div>
             </div>
