@@ -37,18 +37,19 @@ public class AuthService {
             usuario.setUltimoAcceso(LocalDateTime.now());
             usuarioRepository.save(usuario);
 
-            // Crear respuesta
+            // Crear respuesta incluyendo fotoPerfil (puede ser null)
             UsuarioResponse usuarioResponse = new UsuarioResponse(
                     usuario.getId(),
                     usuario.getNombre(),
                     usuario.getEmail(),
-                    usuario.getFotoPerfil()
+                    usuario.getFotoPerfil()  // ✅ Ya lo tienes
             );
 
             return new ApiResponse<>(true, "Login exitoso", usuarioResponse);
 
         } catch (Exception e) {
             System.out.println("Error en login: " + e.getMessage());
+            e.printStackTrace();
             return new ApiResponse<>(false, "Error interno del servidor");
         }
     }
@@ -67,21 +68,25 @@ public class AuthService {
                     passwordEncoder.encode(request.getPassword())
             );
 
+            // La foto de perfil será null por defecto (se puede agregar después)
+            nuevoUsuario.setFotoPerfil(null);
+
             // Guardar en base de datos
             Usuario usuarioGuardado = usuarioRepository.save(nuevoUsuario);
 
-            // Crear respuesta
+            // Crear respuesta incluyendo fotoPerfil (será null para usuarios nuevos)
             UsuarioResponse usuarioResponse = new UsuarioResponse(
                     usuarioGuardado.getId(),
                     usuarioGuardado.getNombre(),
                     usuarioGuardado.getEmail(),
-                    usuarioGuardado.getFotoPerfil()
+                    usuarioGuardado.getFotoPerfil()  // ✅ Ya lo tienes
             );
 
             return new ApiResponse<>(true, "Usuario registrado exitosamente", usuarioResponse);
 
         } catch (Exception e) {
             System.out.println("Error en registro: " + e.getMessage());
+            e.printStackTrace();
             return new ApiResponse<>(false, "Error interno del servidor");
         }
     }
