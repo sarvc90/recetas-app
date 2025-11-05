@@ -1,129 +1,172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Rincón de los Sabores - Recetas</title>
-    <link rel="stylesheet" href="styles-recetas.css">
-</head>
-<body>
-<div class="container">
-    <h1>El Rincón de los Sabores</h1>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>El Rincón de los Sabores - Recetas</title>
+        <link rel="stylesheet" href="styles-recetas.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>El Rincón de los Sabores</h1>
 
-    <div class="content-section">
-        <!-- Botón para agregar receta -->
-        <div class="action-buttons">
-            <button id="addRecipeBtn" class="primary-btn">Agregar Nueva Receta</button>
-        </div>
-
-        <!-- Barra de búsqueda -->
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Buscar recetas por nombre o descripción...">
-            <button id="searchBtn">Buscar</button>
-        </div>
-
-        <!-- Formulario de nueva receta (oculto por defecto) -->
-        <div id="recipeForm" class="recipe-form hidden">
-            <h2>Nueva Receta</h2>
-            <form id="newRecipeForm">
-                <div class="form-group">
-                    <label for="recipeName">Nombre de la receta:</label>
-                    <input type="text" id="recipeName" required>
+            <div class="content-section">
+                <!-- Botón para agregar receta -->
+                <div class="action-buttons">
+                    <button id="addRecipeBtn" class="primary-btn">
+                        Agregar Nueva Receta
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="recipeDescription">Descripción:</label>
-                    <textarea id="recipeDescription" required></textarea>
+
+                <!-- Barra de búsqueda -->
+                <div class="search-bar">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Buscar recetas por nombre o descripción..."
+                    />
+                    <button id="searchBtn">Buscar</button>
                 </div>
-                <div class="form-group">
-                    <label for="recipeImage">Imagen:</label>
-                    <input type="file" id="recipeImage" accept="image/*">
-                    <div id="imagePreview" class="image-preview"></div>
+
+                <!-- Formulario de nueva receta (oculto por defecto) -->
+                <div id="recipeForm" class="recipe-form hidden">
+                    <h2>Nueva Receta</h2>
+                    <form id="newRecipeForm">
+                        <div class="form-group">
+                            <label for="recipeName">Nombre de la receta:</label>
+                            <input type="text" id="recipeName" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="recipeDescription">Descripción:</label>
+                            <textarea
+                                id="recipeDescription"
+                                required
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipeImage">Imagen:</label>
+                            <input
+                                type="file"
+                                id="recipeImage"
+                                accept="image/*"
+                            />
+                            <div id="imagePreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipeIngredients"
+                                >Ingredientes (uno por línea):</label
+                            >
+                            <textarea
+                                id="recipeIngredients"
+                                required
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipeInstructions"
+                                >Instrucciones:</label
+                            >
+                            <textarea
+                                id="recipeInstructions"
+                                required
+                            ></textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="submit" class="submit-btn">
+                                Guardar Receta
+                            </button>
+                            <button
+                                type="button"
+                                class="cancel-btn"
+                                id="cancelRecipeBtn"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="recipeIngredients">Ingredientes (uno por línea):</label>
-                    <textarea id="recipeIngredients" required></textarea>
+
+                <!-- Estado de carga -->
+                <div id="loading" class="hidden">Cargando recetas...</div>
+
+                <!-- Mensajes -->
+                <div id="message" class="hidden"></div>
+
+                <!-- Grid de recetas -->
+                <div id="recetasGrid" class="grid"></div>
+
+                <!-- Botón de paginación -->
+                <div class="pagination">
+                    <button id="loadMore" class="hidden">Cargar más</button>
                 </div>
-                <div class="form-group">
-                    <label for="recipeInstructions">Instrucciones:</label>
-                    <textarea id="recipeInstructions" required></textarea>
-                </div>
-                <div class="form-buttons">
-                    <button type="submit" class="submit-btn">Guardar Receta</button>
-                    <button type="button" class="cancel-btn" id="cancelRecipeBtn">Cancelar</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Estado de carga -->
-        <div id="loading" class="hidden">Cargando recetas...</div>
-
-        <!-- Mensajes -->
-        <div id="message" class="hidden"></div>
-
-        <!-- Grid de recetas -->
-        <div id="recetasGrid" class="grid"></div>
-
-        <!-- Botón de paginación -->
-        <div class="pagination">
-            <button id="loadMore" class="hidden">Cargar más</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de detalle -->
-<div id="modal" class="modal hidden">
-    <div class="modal-content">
-        <span id="closeModal" class="close">&times;</span>
-        <h2 id="modalTitle"></h2>
-
-        <!-- Sección de calificación -->
-        <div class="rating-section">
-            <div class="rating-display">
-                <span class="rating-stars" id="ratingStars">☆☆☆☆☆</span>
-                <span class="rating-text" id="ratingText">Sin calificaciones</span>
             </div>
         </div>
 
-        <h3 id="modalDescription"></h3>
-        <img id="modalImage" alt="Imagen receta">
-        <button id="favBtn" class="fav-btn">🤍 Agregar a Favoritos</button>
-        <div class="modal-info">
-            <h3>Ingredientes</h3>
-            <ul id="modalIngredientes"></ul>
-            <h3>Instrucciones</h3>
-            <p id="modalInstrucciones"></p>
-        </div>
+        <!-- Modal de detalle -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <span id="closeModal" class="close">&times;</span>
+                <h2 id="modalTitle"></h2>
 
-        <!-- Sección de comentarios -->
-        <div class="comments-section">
-            <h3>Comentarios y Calificaciones</h3>
-
-            <!-- Formulario para agregar comentario -->
-            <div id="commentForm" class="comment-form">
-                <h4>Deja tu comentario</h4>
-                <div class="rating-input">
-                    <label>Tu calificación:</label>
-                    <div class="stars-input">
-                        <span class="star" data-rating="1">☆</span>
-                        <span class="star" data-rating="2">☆</span>
-                        <span class="star" data-rating="3">☆</span>
-                        <span class="star" data-rating="4">☆</span>
-                        <span class="star" data-rating="5">☆</span>
+                <!-- Sección de calificación -->
+                <div class="rating-section">
+                    <div class="rating-display">
+                        <span class="rating-stars" id="ratingStars">☆☆☆☆☆</span>
+                        <span class="rating-text" id="ratingText"
+                            >Sin calificaciones</span
+                        >
                     </div>
-                    <span id="selectedRating" class="selected-rating">No seleccionada</span>
                 </div>
-                <textarea id="commentText" placeholder="Escribe tu comentario aquí..." rows="4"></textarea>
-                <button id="submitComment" class="submit-comment-btn">Publicar Comentario</button>
-            </div>
 
-            <!-- Lista de comentarios -->
-            <div id="commentsList" class="comments-list">
-                <p class="no-comments">Cargando comentarios...</p>
+                <h3 id="modalDescription"></h3>
+                <img id="modalImage" alt="Imagen receta" />
+                <button id="favBtn" class="fav-btn">
+                    🤍 Agregar a Favoritos
+                </button>
+                <div class="modal-info">
+                    <h3>Ingredientes</h3>
+                    <ul id="modalIngredientes"></ul>
+                    <h3>Instrucciones</h3>
+                    <p id="modalInstrucciones"></p>
+                </div>
+
+                <!-- Sección de comentarios -->
+                <div class="comments-section">
+                    <h3>Comentarios y Calificaciones</h3>
+
+                    <!-- Formulario para agregar comentario -->
+                    <div id="commentForm" class="comment-form">
+                        <h4>Deja tu comentario</h4>
+                        <div class="rating-input">
+                            <label>Tu calificación:</label>
+                            <div class="stars-input">
+                                <span class="star" data-rating="1">☆</span>
+                                <span class="star" data-rating="2">☆</span>
+                                <span class="star" data-rating="3">☆</span>
+                                <span class="star" data-rating="4">☆</span>
+                                <span class="star" data-rating="5">☆</span>
+                            </div>
+                            <span id="selectedRating" class="selected-rating"
+                                >No seleccionada</span
+                            >
+                        </div>
+                        <textarea
+                            id="commentText"
+                            placeholder="Escribe tu comentario aquí..."
+                            rows="4"
+                        ></textarea>
+                        <button id="submitComment" class="submit-comment-btn">
+                            Publicar Comentario
+                        </button>
+                    </div>
+
+                    <!-- Lista de comentarios -->
+                    <div id="commentsList" class="comments-list">
+                        <p class="no-comments">Cargando comentarios...</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<script src="recetas.js"></script>
-</body>
+        <script src="recetas.js"></script>
+    </body>
 </html>
