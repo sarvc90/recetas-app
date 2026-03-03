@@ -15,7 +15,7 @@ public class AuthService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public ApiResponse<UsuarioResponse> login(LoginRequest request) {
         try {
@@ -42,7 +42,7 @@ public class AuthService {
                     usuario.getId(),
                     usuario.getNombre(),
                     usuario.getEmail(),
-                    usuario.getFotoPerfil()  // ✅ Ya lo tienes
+                    usuario.getFotoPerfil()
             );
 
             return new ApiResponse<>(true, "Login exitoso", usuarioResponse);
@@ -79,7 +79,7 @@ public class AuthService {
                     usuarioGuardado.getId(),
                     usuarioGuardado.getNombre(),
                     usuarioGuardado.getEmail(),
-                    usuarioGuardado.getFotoPerfil()  // ✅ Ya lo tienes
+                    usuarioGuardado.getFotoPerfil()
             );
 
             return new ApiResponse<>(true, "Usuario registrado exitosamente", usuarioResponse);
@@ -90,4 +90,6 @@ public class AuthService {
             return new ApiResponse<>(false, "Error interno del servidor");
         }
     }
+
+
 }

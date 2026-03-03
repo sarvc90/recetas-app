@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal" created-in="IU-253.28294.334">
+    <data-source name="recetas_app@recetas-app.crss8egc8xwr.sa-east-1.rds.amazonaws.com" uuid="4471635b-a4a8-4276-bfb1-e287b186e2ca">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MYSQL" />
+      <user-name>recetas_user</user-name>
+      <schema-mapping />
+    </data-source>
+  </component>
+</project>
