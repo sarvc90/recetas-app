@@ -5,16 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9983a444-3151-4e66-b40f-e1a593171239" name="Changes" comment="Editar Perfil ya funcional. Se integran los cambios correctamente.">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/recetas-app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/recetas-app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/mvnw" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/mvnw" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/RecetasAppApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/RecetasAppApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-app/src/main/java/com/recetas/app/controller/RecetaController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recetas-frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/recetas-frontend/index.html" afterDir="false" />
     </list>
     <list id="1cf64500-a4fa-482d-b534-e3b16b708825" name="Changes by Angie" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -157,7 +152,8 @@
       <workItem from="1772467302862" duration="187000" />
       <workItem from="1772467500172" duration="17249000" />
       <workItem from="1772488768479" duration="8012000" />
-      <workItem from="1772498349959" duration="5104000" />
+      <workItem from="1772498349959" duration="5582000" />
+      <workItem from="1772752807570" duration="9796000" />
     </task>
     <task id="LOCAL-00001" summary="ver recetas propias">
       <option name="closed" value="true" />
