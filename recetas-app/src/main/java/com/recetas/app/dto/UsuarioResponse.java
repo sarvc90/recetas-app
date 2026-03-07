@@ -5,12 +5,13 @@ public class UsuarioResponse {
     private String nombre;
     private String email;
     private String fotoPerfil;
+    private String token;
 
     // Constructor vacío
     public UsuarioResponse() {
     }
 
-    // Constructor completo
+    // Constructor sin token (para compatibilidad)
     public UsuarioResponse(Long id, String nombre, String email, String fotoPerfil) {
         this.id = id;
         this.nombre = nombre;
@@ -18,36 +19,28 @@ public class UsuarioResponse {
         this.fotoPerfil = fotoPerfil;
     }
 
-    // Getters y Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
+    // Constructor con token
+    public UsuarioResponse(Long id, String nombre, String email, String fotoPerfil, String token) {
         this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getFotoPerfil() {
-        return fotoPerfil;
-    }
-
-    public void setFotoPerfil(String fotoPerfil) {
         this.fotoPerfil = fotoPerfil;
+        this.token = token;
     }
+
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

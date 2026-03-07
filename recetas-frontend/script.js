@@ -102,6 +102,7 @@ async function loginUsuario() {
 
             // Guardar datos en localStorage (puedes guardar token si tu backend lo envía)
             localStorage.setItem("usuario", JSON.stringify(data.data));
+            localStorage.setItem("token", data.data.token);
 
             // Redirigir a recetas.html después de 1.5 segundos
             setTimeout(() => {

@@ -1,5 +1,6 @@
 package com.recetas.app.service;
 
+import com.recetas.app.config.JwtUtil;
 import com.recetas.app.dto.*;
 import com.recetas.app.entity.Usuario;
 import com.recetas.app.repository.UsuarioRepository;
@@ -15,11 +16,13 @@ public class AuthService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public ApiResponse<UsuarioResponse> login(LoginRequest request) {
         try {
-            // Buscar usuario por email
             Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
 
             if (usuarioOpt.isEmpty()) {
@@ -28,7 +31,6 @@ public class AuthService {
 
             Usuario usuario = usuarioOpt.get();
 
-            // Verificar contraseña
             if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
                 return new ApiResponse<>(false, "Credenciales incorrectas");
             }
@@ -37,12 +39,16 @@ public class AuthService {
             usuario.setUltimoAcceso(LocalDateTime.now());
             usuarioRepository.save(usuario);
 
-            // Crear respuesta incluyendo fotoPerfil (puede ser null)
+            // Generar token JWT
+            String token = jwtUtil.generateToken(usuario.getId(), usuario.getEmail());
+
+            // Retornar respuesta con token
             UsuarioResponse usuarioResponse = new UsuarioResponse(
                     usuario.getId(),
                     usuario.getNombre(),
                     usuario.getEmail(),
-                    usuario.getFotoPerfil()
+                    usuario.getFotoPerfil(),
+                    token
             );
 
             return new ApiResponse<>(true, "Login exitoso", usuarioResponse);
@@ -56,30 +62,28 @@ public class AuthService {
 
     public ApiResponse<UsuarioResponse> registro(RegistroRequest request) {
         try {
-            // Verificar si el email ya existe
             if (usuarioRepository.existsByEmail(request.getEmail())) {
                 return new ApiResponse<>(false, "El email ya está registrado");
             }
 
-            // Crear nuevo usuario
             Usuario nuevoUsuario = new Usuario(
                     request.getNombre(),
                     request.getEmail(),
                     passwordEncoder.encode(request.getPassword())
             );
 
-            // La foto de perfil será null por defecto (se puede agregar después)
             nuevoUsuario.setFotoPerfil(null);
-
-            // Guardar en base de datos
             Usuario usuarioGuardado = usuarioRepository.save(nuevoUsuario);
 
-            // Crear respuesta incluyendo fotoPerfil (será null para usuarios nuevos)
+            // Generar token JWT también en registro
+            String token = jwtUtil.generateToken(usuarioGuardado.getId(), usuarioGuardado.getEmail());
+
             UsuarioResponse usuarioResponse = new UsuarioResponse(
                     usuarioGuardado.getId(),
                     usuarioGuardado.getNombre(),
                     usuarioGuardado.getEmail(),
-                    usuarioGuardado.getFotoPerfil()
+                    usuarioGuardado.getFotoPerfil(),
+                    token
             );
 
             return new ApiResponse<>(true, "Usuario registrado exitosamente", usuarioResponse);
@@ -90,6 +94,4 @@ public class AuthService {
             return new ApiResponse<>(false, "Error interno del servidor");
         }
     }
-
-
 }
