@@ -2,7 +2,7 @@
 # =============================================================
 # deploy.sh - Script de despliegue en AWS EC2
 # =============================================================
-# Uso: Copiar este script al servidor EC2 y ejecutar:
+# Uso: Copiar este script al servidor EC2 y ejecutarlo:
 #   chmod +x deploy.sh
 #   ./deploy.sh
 # =============================================================
@@ -19,7 +19,7 @@ echo "=========================================="
 echo " Desplegando ${APP_NAME} en EC2"
 echo "=========================================="
 
-# 1. Instalar Java 21 si no esta instalado
+# 1. Instalar Java 21 si no está instalado
 if ! java -version 2>&1 | grep -q "21"; then
     echo "[1/6] Instalando Java 21..."
     sudo yum install -y java-21-amazon-corretto-headless 2>/dev/null || \
@@ -28,14 +28,14 @@ else
     echo "[1/6] Java 21 ya instalado"
 fi
 
-# 2. Crear directorio de la aplicacion
+# 2. Crear directorio de la aplicación
 echo "[2/6] Creando directorio ${APP_DIR}..."
 sudo mkdir -p ${APP_DIR}
 sudo chown $USER:$USER ${APP_DIR}
 
-# 3. Copiar el JAR (asume que ya se copio con scp)
+# 3. Copiar el JAR (asume que ya se copió con scp)
 if [ ! -f "${APP_DIR}/${JAR_NAME}" ]; then
-    echo "ERROR: No se encontro ${APP_DIR}/${JAR_NAME}"
+    echo "ERROR: No se encontró ${APP_DIR}/${JAR_NAME}"
     echo "Copia el JAR al servidor con:"
     echo "  scp -i tu-key.pem target/${JAR_NAME} ec2-user@<EC2_IP>:${APP_DIR}/"
     exit 1
@@ -47,7 +47,7 @@ echo "[4/6] Configurando variables de entorno..."
 if [ ! -f "${APP_DIR}/.env" ]; then
     cat > ${APP_DIR}/.env << 'EOF'
 # ==========================================
-# Variables de entorno para produccion
+# Variables de entorno para producción
 # EDITAR con tus valores reales
 # ==========================================
 SPRING_PROFILES_ACTIVE=prod
@@ -64,10 +64,10 @@ RDS_PASSWORD=RecetasApp123*
 # CLOUDINARY_API_KEY=658511773432214
 # CLOUDINARY_API_SECRET=MsvQCfUmnxkQtFn3HBa2lLZ7y_c
 
-# CORS (IP publica de tu EC2 o dominio)
+# CORS (IP pública de tu EC2 o dominio)
 # CORS_ALLOWED_ORIGINS=http://<EC2_PUBLIC_IP>,http://tu-dominio.com
 EOF
-    echo "  -> Archivo ${APP_DIR}/.env creado. EDITALO con tus credenciales reales."
+    echo "  -> Archivo ${APP_DIR}/.env creado. EDÍTALO con tus credenciales reales."
 else
     echo "  -> Archivo .env ya existe, se mantiene."
 fi
@@ -110,6 +110,5 @@ echo " Logs:    sudo tail -f ${LOG_FILE}"
 echo " Parar:   sudo systemctl stop ${SERVICE_NAME}"
 echo " Reiniciar: sudo systemctl restart ${SERVICE_NAME}"
 echo ""
-echo " La app esta corriendo en: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo '<EC2_PUBLIC_IP>'):8080"
+echo " La app está corriendo en: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo '<EC2_PUBLIC_IP>'):8080"
 echo ""
-

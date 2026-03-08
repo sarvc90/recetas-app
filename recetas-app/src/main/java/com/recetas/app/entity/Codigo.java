@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "codigos_recuperacion")
-public class CodigoRecuperacion {
+public class Codigo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,6 +13,10 @@ public class CodigoRecuperacion {
 
     @Column(nullable = false, length = 6)
     private String codigo;
+
+    @Column(nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private TipoCodigo tipo; // RECUPERACION, AUTENTIFICACION o VERIFICACION_EMAIL
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
@@ -27,12 +31,13 @@ public class CodigoRecuperacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    public CodigoRecuperacion() {
+    public Codigo() {
     }
 
-    public CodigoRecuperacion(String codigo, Usuario usuario, int minutosExpiracion) {
+    public Codigo(String codigo, Usuario usuario, int minutosExpiracion, TipoCodigo tipo) {
         this.codigo = codigo;
         this.usuario = usuario;
+        this.tipo = tipo;
         this.fechaCreacion = LocalDateTime.now();
         this.fechaExpiracion = this.fechaCreacion.plusMinutes(minutosExpiracion);
         this.usado = false;
@@ -48,6 +53,9 @@ public class CodigoRecuperacion {
 
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
+
+    public TipoCodigo getTipo() { return tipo; }
+    public void setTipo(TipoCodigo tipo) { this.tipo = tipo; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }

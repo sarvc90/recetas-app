@@ -6,6 +6,7 @@ public class UsuarioResponse {
     private String email;
     private String fotoPerfil;
     private String token;
+    private boolean emailVerificado;
 
     // Constructor vacío
     public UsuarioResponse() {
@@ -43,4 +44,7 @@ public class UsuarioResponse {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public boolean isEmailVerificado() { return emailVerificado; }
+    public void setEmailVerificado(boolean emailVerificado) { this.emailVerificado = emailVerificado; }
 }

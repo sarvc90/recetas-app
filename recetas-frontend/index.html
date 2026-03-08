@@ -29,8 +29,43 @@
             placeholder="Mínimo 6 caracteres"
           />
         </div>
-        <button onclick="registrarUsuario()">Crear Cuenta</button>
+        <button id="registro-btn" onclick="registrarUsuario()">
+          Crear Cuenta
+        </button>
         <div id="resultado-registro" class="result"></div>
+
+        <!-- Código de verificación de email (visible tras enviar el registro) -->
+        <div id="verification-code-section" style="display: none">
+          <div class="form-group">
+            <label for="verification-code">Código de verificación:</label>
+            <input
+              type="text"
+              id="verification-code"
+              maxlength="6"
+              placeholder="Código de 6 dígitos"
+              autocomplete="one-time-code"
+            />
+          </div>
+          <button onclick="verificarRegistroCode()">
+            Verificar y completar registro
+          </button>
+          <div style="text-align: center; margin-top: 10px">
+            <a
+              href="#"
+              onclick="
+                cancelarRegistro();
+                return false;
+              "
+              style="
+                color: #68c1e1;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 14px;
+              "
+              >← Volver / Reenviar código</a
+            >
+          </div>
+        </div>
       </div>
 
       <!-- SECCIÓN DE LOGIN -->
@@ -48,8 +83,40 @@
             placeholder="Tu contraseña"
           />
         </div>
-        <button onclick="loginUsuario()">Ingresar</button>
+        <button id="login-btn" onclick="loginUsuario()">Ingresar</button>
         <div id="resultado-login" class="result"></div>
+
+        <!-- Código de autenticación 2FA (visible tras primer envío) -->
+        <div id="auth-code-section" style="display: none">
+          <div class="form-group">
+            <label for="auth-code">Código de autenticación:</label>
+            <input
+              type="text"
+              id="auth-code"
+              maxlength="6"
+              placeholder="Código de 6 dígitos"
+              autocomplete="one-time-code"
+            />
+          </div>
+          <button onclick="verificarAuthCode()">Verificar código</button>
+          <div style="text-align: center; margin-top: 10px">
+            <a
+              href="#"
+              onclick="
+                cancelarLogin();
+                return false;
+              "
+              style="
+                color: #68c1e1;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 14px;
+              "
+              >← Volver / Reenviar código</a
+            >
+          </div>
+        </div>
+
         <div style="text-align: center; margin-top: 15px">
           <a
             href="recuperar-password.html"
@@ -65,6 +132,6 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="config/env-loader.js" data-main="script.js"></script>
   </body>
 </html>

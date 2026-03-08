@@ -17,6 +17,9 @@ public class RegistroRequest {
     @Size(min = 6, message = "Password debe tener mínimo 6 caracteres")
     private String password;
 
+    @Size(min = 6, max = 6, message = "El código de verificación debe tener exactamente 6 caracteres")
+    private String verificationCode;
+
     // Constructores
     public RegistroRequest() {}
 
@@ -24,6 +27,14 @@ public class RegistroRequest {
         this.nombre = nombre;
         this.email = email;
         this.password = password;
+        this.verificationCode = null;
+    }
+
+    public RegistroRequest(String nombre, String email, String password, String verificationCode) {
+        this.nombre = nombre;
+        this.email = email;
+        this.password = password;
+        this.verificationCode = verificationCode;
     }
 
     // Getters y Setters
@@ -35,4 +46,7 @@ public class RegistroRequest {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getVerificationCode() { return verificationCode; }
+    public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
 }

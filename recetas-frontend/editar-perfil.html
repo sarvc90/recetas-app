@@ -1,74 +1,131 @@
 <!doctype html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Editar Perfil - El Rincón de los Sabores</title>
-        <link rel="stylesheet" href="styles-editar-perfil.css" />
-    </head>
-    <body>
-        <div class="container">
-            <h1>Editar Mi Perfil</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Perfil - El Rincón de los Sabores</title>
+    <link rel="stylesheet" href="styles-editar-perfil.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Editar Mi Perfil</h1>
 
-            <div class="content-section">
-                <div class="header-actions">
-                    <a href="recetas.html" class="back-btn"
-                        >⬅ Volver a recetas</a
-                    >
-                </div>
-
-                <div id="message" class="hidden"></div>
-                <div id="loading" class="hidden">Cargando perfil...</div>
-
-                <form id="editarPerfilForm" class="perfil-form">
-                    <div class="foto-perfil-section">
-                        <div class="foto-placeholder">
-                            <img
-                                    id="fotoActual"
-                                    src="icon.png"
-                                    alt="Usuario"
-                                    style="width: 50%; height: 50%; object-fit: cover;border-radius: 80px;"
-                            />
-                        </div>
-                        <div class="form-group">
-                            <label for="fotoPerfil"
-                                >Cambiar foto de perfil</label
-                            >
-                            <input
-                                type="file"
-                                id="fotoPerfil"
-                                accept="image/*"
-                            />
-                            <small>Formatos: JPG, PNG, GIF (máx. 5MB)</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nombre">Nombre completo</label>
-                        <input
-                            type="text"
-                            id="nombre"
-                            required
-                            placeholder="Tu nombre completo"
-                        />
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="submit" class="submit-btn">
-                            Guardar cambios
-                        </button>
-                        <button
-                            type="button"
-                            class="cancel-btn"
-                            onclick="window.history.back()"
-                        >
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <div class="content-section">
+        <div class="header-actions">
+          <a href="recetas.html" class="back-btn">⬅ Volver a recetas</a>
         </div>
 
-        <script src="editar-perfil.js"></script>
-    </body>
+        <div id="message" class="hidden"></div>
+        <div id="loading" class="hidden">Cargando perfil...</div>
+
+        <form id="editarPerfilForm" class="perfil-form">
+          <div class="foto-perfil-section">
+            <div class="foto-placeholder">
+              <img
+                id="fotoActual"
+                src="icon.png"
+                alt="Usuario"
+                style="
+                  width: 50%;
+                  height: 50%;
+                  object-fit: cover;
+                  border-radius: 80px;
+                "
+              />
+            </div>
+            <div class="form-group">
+              <label for="fotoPerfil">Cambiar foto de perfil</label>
+              <input type="file" id="fotoPerfil" accept="image/*" />
+              <small>Formatos: JPG, PNG, GIF (máx. 5MB)</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nombre">Nombre completo</label>
+            <input
+              type="text"
+              id="nombre"
+              required
+              placeholder="Tu nombre completo"
+            />
+          </div>
+
+          <!-- Verificación de email -->
+          <div class="form-group" id="email-verificado-section">
+            <label>Estado del email</label>
+            <div
+              id="email-status-text"
+              style="font-size: 14px; margin-top: 4px; color: #666"
+            ></div>
+            <button
+              type="button"
+              id="solicitar-verificacion-btn"
+              onclick="solicitarVerificacionEmail()"
+              style="
+                margin-top: 8px;
+                padding: 10px 20px;
+                font-size: 14px;
+                width: auto;
+                background: #85a4e8;
+                display: none;
+              "
+            >
+              Verificar email
+            </button>
+          </div>
+
+          <div id="codigo-verificacion-section" style="display: none">
+            <div class="form-group">
+              <label for="codigo-verificacion">Código de verificación</label>
+              <input
+                type="text"
+                id="codigo-verificacion"
+                maxlength="6"
+                placeholder="Código de 6 dígitos recibido por correo"
+                autocomplete="one-time-code"
+              />
+            </div>
+            <button
+              type="button"
+              onclick="confirmarVerificacionEmail()"
+              style="
+                width: auto;
+                padding: 10px 20px;
+                font-size: 14px;
+                background: #53b6ae;
+              "
+            >
+              Confirmar código
+            </button>
+            <button
+              type="button"
+              onclick="cancelarVerificacionEmail()"
+              style="
+                width: auto;
+                padding: 10px 20px;
+                font-size: 14px;
+                background: #aaa;
+                margin-left: 8px;
+              "
+            >
+              Cancelar
+            </button>
+          </div>
+
+          <div class="form-buttons">
+            <button type="submit" class="submit-btn">Guardar cambios</button>
+            <button
+              type="button"
+              class="cancel-btn"
+              onclick="window.history.back()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="config/env-loader.js" data-main="editar-perfil.js"></script>
+  </body>
 </html>

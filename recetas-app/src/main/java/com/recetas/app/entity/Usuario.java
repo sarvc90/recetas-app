@@ -36,9 +36,13 @@ public class Usuario {
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
 
+    @Column(name = "email_verificado", nullable = false)
+    private boolean emailVerificado;
+
     // Constructor vacío (requerido por JPA)
     public Usuario() {
         this.fechaCreacion = LocalDateTime.now();
+        this.emailVerificado = false;
     }
 
     // Constructor con parámetros
@@ -70,4 +74,7 @@ public class Usuario {
 
     public LocalDateTime getUltimoAcceso() { return ultimoAcceso; }
     public void setUltimoAcceso(LocalDateTime ultimoAcceso) { this.ultimoAcceso = ultimoAcceso; }
+
+    public boolean isEmailVerificado() { return emailVerificado; }
+    public void setEmailVerificado(boolean emailVerificado) { this.emailVerificado = emailVerificado; }
 }

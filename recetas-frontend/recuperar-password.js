@@ -1,5 +1,5 @@
 // recuperar-password.js
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = window.APP_CONFIG.API_BASE_URL || 'http://localhost:8080/api';
 
 let emailRecuperacion = '';
 
@@ -63,7 +63,7 @@ async function solicitarCodigo() {
   } catch (error) {
     mostrarResultado(
       'resultado-email',
-      `❌ Error de conexión: ${error.message}<br>¿Está corriendo el backend en puerto 8080?`,
+      `❌ Error de conexión: ${error.message}`,
       'error',
     );
   }
@@ -148,7 +148,7 @@ async function resetPassword() {
   } catch (error) {
     mostrarResultado(
       'resultado-reset',
-      `❌ Error de conexión: ${error.message}<br>Verifica que el backend esté funcionando`,
+      `❌ Error de conexión: ${error.message}`,
       'error',
     );
   }

@@ -1,4 +1,4 @@
-# Guia de Despliegue: EC2 + RDS
+# Guía de Despliegue: EC2 + RDS
 
 ## Arquitectura
 
@@ -25,7 +25,7 @@
 
 ### 1.1 Crear la instancia RDS (si no la tienes)
 1. Ve a **AWS Console > RDS > Create database**
-2. Configuracion:
+2. Configuración:
    - Engine: **MySQL 8.0**
    - Template: **Free tier**
    - DB instance identifier: `recetas-app`
@@ -35,7 +35,7 @@
    - Region: `sa-east-1`
 
 ### 1.2 Configurar Security Group de RDS
-El Security Group de RDS debe permitir trafico **solo desde el Security Group del EC2**:
+El Security Group de RDS debe permitir tráfico **solo desde el Security Group del EC2**:
 
 | Tipo  | Protocolo | Puerto | Origen                        |
 |-------|-----------|--------|-------------------------------|
@@ -49,7 +49,7 @@ El Security Group de RDS debe permitir trafico **solo desde el Security Group de
 
 ### 2.1 Crear la instancia EC2
 1. Ve a **AWS Console > EC2 > Launch Instance**
-2. Configuracion:
+2. Configuración:
    - AMI: **Amazon Linux 2023** o **Ubuntu 22.04**
    - Instance type: **t2.micro** (Free tier)
    - Key pair: Crear o seleccionar una (descargar `.pem`)
@@ -77,13 +77,13 @@ mysql -h recetas-app.crss8egc8xwr.sa-east-1.rds.amazonaws.com -u recetas_user -p
 CREATE DATABASE IF NOT EXISTS recetas_db;
 ```
 
-> Hibernate con `ddl-auto=update` creara las tablas automaticamente.
+> Hibernate con `ddl-auto=update` creará las tablas automáticamente.
 
 ---
 
 ## Paso 4: Compilar el JAR
 
-Desde tu maquina local:
+Desde tu máquina local:
 
 ```bash
 cd recetas-app/recetas-app
@@ -144,7 +144,7 @@ Desde tu navegador: `http://<EC2_PUBLIC_IP>:8080`
 
 ---
 
-## Ejecucion local (desarrollo)
+## Ejecución local (desarrollo)
 
 No necesitas cambiar nada. Por defecto usa el perfil `dev`:
 
@@ -155,20 +155,19 @@ No necesitas cambiar nada. Por defecto usa el perfil `dev`:
 
 Esto conecta a `localhost:3306/recetas_db` con `root/root`.
 
-Si quieres probar el perfil de produccion localmente:
+Si quieres probar el perfil de producción localmente:
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
 ---
 
-## Resumen de archivos de configuracion
+## Resumen de archivos de configuración
 
-| Archivo                         | Proposito                              |
+| Archivo                         | Propósito                              |
 |---------------------------------|----------------------------------------|
-| `application.properties`        | Config comun (ambos perfiles)          |
+| `application.properties`        | Config. común (ambos perfiles)         |
 | `application-dev.properties`    | BD local, logs detallados              |
-| `application-prod.properties`   | BD RDS, logs minimos, CORS produccion  |
+| `application-prod.properties`   | BD RDS, logs mínimos, CORS producción  |
 | `deploy.sh`                     | Script para desplegar en EC2           |
 | `/opt/recetas-app/.env`         | Variables de entorno en el servidor    |
-

@@ -50,22 +50,27 @@ public class DataInitializer implements CommandLineRunner {
 
         // ===================== USUARIOS =====================
         Usuario carlos = new Usuario("Carlos García", "carlos@email.com", hashedPassword);
+        carlos.setEmailVerificado(true);
         carlos.setFechaCreacion(LocalDateTime.of(2025, 1, 15, 10, 30));
         carlos.setUltimoAcceso(LocalDateTime.of(2026, 2, 28, 14, 0));
 
         Usuario maria = new Usuario("María López", "maria@email.com", hashedPassword);
+        maria.setEmailVerificado(true);
         maria.setFechaCreacion(LocalDateTime.of(2025, 2, 20, 8, 15));
         maria.setUltimoAcceso(LocalDateTime.of(2026, 3, 1, 9, 30));
 
         Usuario juan = new Usuario("Juan Rodríguez", "juan@email.com", hashedPassword);
+        juan.setEmailVerificado(true);
         juan.setFechaCreacion(LocalDateTime.of(2025, 3, 10, 16, 45));
         juan.setUltimoAcceso(LocalDateTime.of(2026, 2, 25, 20, 15));
 
         Usuario ana = new Usuario("Ana Martínez", "ana@email.com", hashedPassword);
+        ana.setEmailVerificado(true);
         ana.setFechaCreacion(LocalDateTime.of(2025, 4, 5, 12, 0));
         ana.setUltimoAcceso(LocalDateTime.of(2026, 3, 1, 11, 0));
 
         Usuario pedro = new Usuario("Pedro Sánchez", "pedro@email.com", hashedPassword);
+        pedro.setEmailVerificado(true);
         pedro.setFechaCreacion(LocalDateTime.of(2025, 5, 18, 9, 0));
         pedro.setUltimoAcceso(LocalDateTime.of(2026, 2, 27, 18, 45));
 

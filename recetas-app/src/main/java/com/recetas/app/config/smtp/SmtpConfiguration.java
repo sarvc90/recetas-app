@@ -10,12 +10,11 @@ public class SmtpConfiguration {
 
     @Bean
     public SmtpProperties smtpProperties(SmtpConfigurationProperties properties) {
-        return SmtpProperties.builder()
-                .host(properties.getHost())
-                .port(properties.getPort())
-                .username(properties.getUsername())
-                .password(properties.getPassword())
-                .build();
+        return new SmtpProperties(
+                properties.getHost(),
+                properties.getPort(),
+                properties.getUsername(),
+                properties.getPassword()
+        );
     }
-
 }

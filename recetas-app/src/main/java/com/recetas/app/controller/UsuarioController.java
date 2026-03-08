@@ -3,6 +3,7 @@ package com.recetas.app.controller;
 import com.recetas.app.dto.ApiResponse;
 import com.recetas.app.dto.EditarUsuarioRequest;
 import com.recetas.app.dto.UsuarioResponse;
+import com.recetas.app.dto.VerificarEmailRequest;
 import com.recetas.app.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,27 @@ public class UsuarioController {
             @RequestParam("file") MultipartFile file) {
 
         ApiResponse<String> response = usuarioService.subirFotoPerfil(id, file);
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Solicitar código de verificación de email (usuario autenticado)
+    @PostMapping("/{id}/solicitar-verificacion-email")
+    public ResponseEntity<ApiResponse<Void>> solicitarVerificacionEmail(@PathVariable Long id) {
+        ApiResponse<Void> response = usuarioService.solicitarVerificacionEmail(id);
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Verificar email con el código recibido
+    @PostMapping("/{id}/verificar-email")
+    public ResponseEntity<ApiResponse<Void>> verificarEmail(
+            @PathVariable Long id,
+            @Valid @RequestBody VerificarEmailRequest request) {
+
+        ApiResponse<Void> response = usuarioService.verificarEmail(id, request.getCodigo());
         return response.isSuccess()
                 ? ResponseEntity.ok(response)
                 : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

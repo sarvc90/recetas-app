@@ -1,7 +1,8 @@
 package com.recetas.app.service;
 
 import com.recetas.app.dto.*;
-import com.recetas.app.entity.CodigoRecuperacion;
+import com.recetas.app.entity.Codigo;
+import com.recetas.app.entity.TipoCodigo;
 import com.recetas.app.entity.Usuario;
 import com.recetas.app.repository.CodigoRecuperacionRepository;
 import com.recetas.app.repository.UsuarioRepository;
@@ -10,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,10 +29,13 @@ public class PasswordRecoveryService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private CodeGenerationService codeGenerationService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * Genera un codigo de recuperacion y lo envia al email del usuario.
+     * Genera un código de recuperación y lo envía al email del usuario.
      */
     @Transactional
     public ApiResponse<Void> solicitarRecuperacion(RecuperarPasswordRequest request) {
@@ -41,26 +44,28 @@ public class PasswordRecoveryService {
 
             if (usuarioOpt.isEmpty()) {
                 // Por seguridad, no revelamos si el email existe o no
-                return new ApiResponse<>(true, "Si el email esta registrado, recibiras un codigo de recuperacion");
+                return new ApiResponse<>(true, "Si el email está registrado, recibirás un código de recuperación");
             }
 
             Usuario usuario = usuarioOpt.get();
 
-            // Invalidar codigos anteriores no usados
-            List<CodigoRecuperacion> codigosAnteriores = codigoRecuperacionRepository.findByUsuarioAndUsadoFalse(usuario);
-            for (CodigoRecuperacion c : codigosAnteriores) {
-                c.setUsado(true);
+            // Invalidar códigos anteriores no usados
+            List<Codigo> codigosAnteriores = codigoRecuperacionRepository.findByUsuarioAndUsadoFalse(usuario);
+            for (Codigo c : codigosAnteriores) {
+                if(c.getTipo().equals(TipoCodigo.RECUPERACION)) {
+                    c.setUsado(true);
+                }
             }
             codigoRecuperacionRepository.saveAll(codigosAnteriores);
 
-            // Generar nuevo codigo de 6 digitos
-            String codigo = generarCodigo();
+            // Generar nuevo código de 6 dígitos
+            String codigo = codeGenerationService.generarCodigo();
 
             // Guardar en la base de datos
-            CodigoRecuperacion codigoRecuperacion = new CodigoRecuperacion(codigo, usuario, MINUTOS_EXPIRACION);
+            Codigo codigoRecuperacion = new Codigo(codigo, usuario, MINUTOS_EXPIRACION, TipoCodigo.RECUPERACION);
             codigoRecuperacionRepository.save(codigoRecuperacion);
 
-            // Enviar email con el codigo
+            // Enviar email con el código
             EmailDto emailDto = new EmailDto(
                     "Recuperación de contraseña - RecetasApp",
                     "Hola " + usuario.getNombre() + ",\n\n"
@@ -70,19 +75,26 @@ public class PasswordRecoveryService {
                             + "- El equipo de El Rincón De Los Sabores",
                     usuario.getEmail()
             );
-            emailService.sendMail(emailDto);
+
+            try {
+                emailService.sendMail(emailDto);
+            } catch (Exception emailError) {
+                codigoRecuperacion.setUsado(true);
+                codigoRecuperacionRepository.save(codigoRecuperacion);
+                return new ApiResponse<>(false, "No se pudo enviar el codigo de recuperacion: " + extraerMensajeEmail(emailError));
+            }
 
             return new ApiResponse<>(true, "Si el email esta registrado, recibiras un codigo de recuperacion");
 
         } catch (Exception e) {
-            System.out.println("Error en solicitar recuperacion: " + e.getMessage());
+            System.out.println("Error al solicitar recuperacion: " + e.getMessage());
             e.printStackTrace();
             return new ApiResponse<>(false, "Error interno del servidor");
         }
     }
 
     /**
-     * Valida el codigo y cambia la contraseña del usuario.
+     * Valida el código y cambia la contraseña del usuario.
      */
     @Transactional
     public ApiResponse<Void> resetPassword(ResetPasswordRequest request) {
@@ -90,36 +102,36 @@ public class PasswordRecoveryService {
             Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
 
             if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Credenciales invalidas");
+                return new ApiResponse<>(false, "Credenciales inválidas");
             }
 
             Usuario usuario = usuarioOpt.get();
 
-            // Buscar el codigo mas reciente no usado del usuario
-            Optional<CodigoRecuperacion> codigoOpt = codigoRecuperacionRepository
-                    .findTopByUsuarioAndUsadoFalseOrderByFechaCreacionDesc(usuario);
+            // Buscar el código más reciente no usado del usuario
+            Optional<Codigo> codigoOpt = codigoRecuperacionRepository
+                    .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.RECUPERACION);
 
             if (codigoOpt.isEmpty()) {
-                return new ApiResponse<>(false, "No hay un codigo de recuperacion activo. Solicita uno nuevo");
+                return new ApiResponse<>(false, "No hay un código de recuperación activo. Solicita uno nuevo");
             }
 
-            CodigoRecuperacion codigoRecuperacion = codigoOpt.get();
+            Codigo codigo = codigoOpt.get();
 
-            // Verificar que el codigo coincida
-            if (!codigoRecuperacion.getCodigo().equals(request.getCodigo())) {
-                return new ApiResponse<>(false, "El codigo de recuperacion es incorrecto");
+            // Verificar que el código coincida
+            if (!codigo.getCodigo().equals(request.getCodigo())) {
+                return new ApiResponse<>(false, "El código de recuperación es incorrecto");
             }
 
             // Verificar que no haya expirado
-            if (codigoRecuperacion.isExpirado()) {
-                codigoRecuperacion.setUsado(true);
-                codigoRecuperacionRepository.save(codigoRecuperacion);
-                return new ApiResponse<>(false, "El codigo de recuperacion ha expirado. Solicita uno nuevo");
+            if (codigo.isExpirado()) {
+                codigo.setUsado(true);
+                codigoRecuperacionRepository.save(codigo);
+                return new ApiResponse<>(false, "El código de recuperación ha expirado. Solicita uno nuevo");
             }
 
-            // Marcar codigo como usado
-            codigoRecuperacion.setUsado(true);
-            codigoRecuperacionRepository.save(codigoRecuperacion);
+            // Marcar código como usado
+            codigo.setUsado(true);
+            codigoRecuperacionRepository.save(codigo);
 
             // Cambiar la contraseña
             usuario.setPassword(passwordEncoder.encode(request.getNuevaPassword()));
@@ -134,13 +146,10 @@ public class PasswordRecoveryService {
         }
     }
 
-    /**
-     * Genera un codigo numerico aleatorio de 6 digitos.
-     */
-    private String generarCodigo() {
-        SecureRandom random = new SecureRandom();
-        int numero = random.nextInt(900000) + 100000; // Rango 100000 - 999999
-        return String.valueOf(numero);
+    private String extraerMensajeEmail(Exception exception) {
+        if (exception.getMessage() == null || exception.getMessage().isBlank()) {
+            return "Revisa la configuracion SMTP del servidor";
+        }
+        return exception.getMessage();
     }
 }
-
