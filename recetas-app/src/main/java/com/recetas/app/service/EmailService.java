@@ -2,13 +2,12 @@ package com.recetas.app.service;
 
 import com.recetas.app.config.smtp.SmtpProperties;
 import com.recetas.app.dto.EmailDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.Mailer;
-import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
-import org.simplejavamail.mailer.MailerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,23 +16,23 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final SmtpProperties smtpProperties;
+    private final Mailer mailer;
 
-    public EmailService(SmtpProperties smtpProperties) {
+    public EmailService(SmtpProperties smtpProperties, Mailer mailer) {
         this.smtpProperties = smtpProperties;
+        this.mailer = mailer;
     }
 
+    /**
+     * Envía un correo de forma síncrona.
+     * Lanza excepción si el envío falla, para que el llamador pueda reaccionar
+     * (p. ej. invalidar el código de verificación generado).
+     * El timeout de sesión está configurado en SmtpConfiguration (10 s),
+     * por lo que nunca se bloqueará indefinidamente.
+     */
+    @Async
     public void sendMail(EmailDto emailDTO) throws Exception {
-        log.info("========== EMAIL SERVICE - INICIO ==========");
-        log.info("SMTP Host: {}", smtpProperties.getHost());
-        log.info("SMTP Port: {}", smtpProperties.getPort());
-        log.info("SMTP Username: {}", smtpProperties.getUsername());
-        log.info("SMTP Password (length): {}, starts with: {}",
-                smtpProperties.getPassword() != null ? smtpProperties.getPassword().length() : "NULL",
-                smtpProperties.getPassword() != null && smtpProperties.getPassword().length() >= 4
-                        ? smtpProperties.getPassword().substring(0, 4) + "****" : "NULL");
-        log.info("Destinatario: {}", emailDTO.recipient());
-        log.info("Asunto: {}", emailDTO.subject());
-        log.info("=============================================");
+        log.info("Enviando email a {} — asunto: {}", emailDTO.recipient(), emailDTO.subject());
 
         Email email = EmailBuilder.startingBlank()
                 .from(smtpProperties.getUsername())
@@ -42,13 +41,9 @@ public class EmailService {
                 .withPlainText(emailDTO.body())
                 .buildEmail();
 
-        try (Mailer mailer = MailerBuilder
-                .withSMTPServer(smtpProperties.getHost(), smtpProperties.getPort(), smtpProperties.getUsername(), smtpProperties.getPassword())
-                .withTransportStrategy(TransportStrategy.SMTP_TLS)
-                .withDebugLogging(true)
-                .buildMailer()) {
-
-            mailer.sendMail(email);
+        try {
+            // false = síncrono: espera confirmación del servidor SMTP
+            mailer.sendMail(email, true);
             log.info("✅ Email enviado exitosamente a {}", emailDTO.recipient());
         } catch (Exception e) {
             log.error("❌ Error enviando email a {}: {}", emailDTO.recipient(), e.getMessage());
@@ -56,3 +51,5 @@ public class EmailService {
         }
     }
 }
+
+
