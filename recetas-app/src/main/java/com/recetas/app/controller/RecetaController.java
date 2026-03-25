@@ -9,6 +9,7 @@ import com.recetas.app.service.ImageService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import com.recetas.app.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/recetas")
@@ -29,6 +31,9 @@ public class RecetaController {
   private ImageService imageService;
 
   @Autowired
+  private JwtUtil jwtUtil;
+
+  @Autowired
   private UsuarioRepository usuarioRepository;
 
   // ✅ Obtener todas las recetas (paginadas)
@@ -39,7 +44,7 @@ public class RecetaController {
 
   // ✅ Crear nueva receta
   @PostMapping
-  public ResponseEntity<Receta> crearReceta(@RequestBody Receta receta) {
+  public ResponseEntity<Receta> crearReceta(@Valid @RequestBody Receta receta) {
     receta.setFechaCreacion(LocalDateTime.now());
     return ResponseEntity.ok(recetaRepository.save(receta));
   }
@@ -94,20 +99,32 @@ public class RecetaController {
 
   // ✅ Eliminar receta
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> eliminarReceta(@PathVariable Long id) {
+  public ResponseEntity<?> eliminarReceta(
+          @PathVariable Long id,
+          @RequestHeader("Authorization") String token) {
+
+    String jwt = token.replace("Bearer ", "");
+    String emailUsuario = jwtUtil.getEmailFromToken(jwt);
+    Usuario usuarioActual = usuarioRepository.findByEmail(emailUsuario).orElse(null);
+
     return recetaRepository
-      .findById(id)
-      .<ResponseEntity<?>>map(receta -> {
-        recetaRepository.deleteById(id);
-        return ResponseEntity.ok(
-          new ApiResponse(true, "Receta eliminada correctamente")
-        );
-      })
-      .orElseGet(() ->
-        ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-          new ApiResponse(false, "Receta no encontrada")
-        )
-      );
+            .findById(id)
+            .<ResponseEntity<?>>map(receta -> {
+              if (!receta.getUsuarioId().equals(usuarioActual.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        new ApiResponse(false, "No tienes permiso para eliminar esta receta")
+                );
+              }
+              recetaRepository.deleteById(id);
+              return ResponseEntity.ok(
+                      new ApiResponse(true, "Receta eliminada correctamente")
+              );
+            })
+            .orElseGet(() ->
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            new ApiResponse(false, "Receta no encontrada")
+                    )
+            );
   }
 
   // ✅ Obtener recetas por usuario (todas)
