@@ -1,5 +1,10 @@
-// recuperar-password
+// recuperar-password.js
+<<<<<<< Updated upstream
+const API_BASE_URL =
+  window.APP_CONFIG.API_BASE_URL || 'http://localhost:8080/api';
+=======
 const API_BASE_URL = window.APP_CONFIG.API_BASE_URL || `${window.location.origin}/api`;
+>>>>>>> Stashed changes
 
 let emailRecuperacion = '';
 

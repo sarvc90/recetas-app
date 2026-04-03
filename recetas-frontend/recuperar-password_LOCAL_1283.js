@@ -1,5 +1,6 @@
-// recuperar-password
-const API_BASE_URL = window.APP_CONFIG.API_BASE_URL || `${window.location.origin}/api`;
+// recuperar-password.js
+const API_BASE_URL =
+  window.APP_CONFIG.API_BASE_URL || 'http://localhost:8080/api';
 
 let emailRecuperacion = '';
 

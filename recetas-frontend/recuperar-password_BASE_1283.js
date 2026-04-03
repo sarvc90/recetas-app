@@ -1,17 +1,13 @@
-// recuperar-password
-const API_BASE_URL = window.APP_CONFIG.API_BASE_URL || `${window.location.origin}/api`;
+// recuperar-password.js
+const API_BASE_URL = window.APP_CONFIG.API_BASE_URL || 'http://localhost:8080/api';
 
 let emailRecuperacion = '';
 
 // Mostrar resultados en la página
 function mostrarResultado(elementId, mensaje, tipo) {
   const elemento = document.getElementById(elementId);
-  if (!elemento) return;
-
-  elemento.textContent = mensaje;
-  elemento.className = `result ${tipo}`.trim();
-  elemento.setAttribute('role', tipo === 'error' ? 'alert' : 'status');
-  elemento.setAttribute('aria-live', 'polite');
+  elemento.innerHTML = mensaje;
+  elemento.className = `result ${tipo}`;
 }
 
 // Paso 1: Solicitar código de recuperación
@@ -162,7 +158,7 @@ async function resetPassword() {
 function volverAPaso1() {
   document.getElementById('paso-reset').style.display = 'none';
   document.getElementById('paso-email').style.display = 'block';
-  document.getElementById('resultado-email').textContent = '';
+  document.getElementById('resultado-email').innerHTML = '';
   document.getElementById('resultado-email').className = 'result';
 }
 

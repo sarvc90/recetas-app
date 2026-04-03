@@ -1,7 +1,7 @@
 const API_RECETAS_URL =
-  window.APP_CONFIG.API_RECETAS_URL || 'http://localhost:8080/api/recetas';
+  window.APP_CONFIG.API_RECETAS_URL || `${window.location.origin}/api/recetas`;
 const API_BASE_URL =
-  window.APP_CONFIG.API_BASE_URL || 'http://localhost:8080/api';
+  window.APP_CONFIG.API_BASE_URL || `${window.location.origin}/api`;
 const grid = document.getElementById('misRecetasGrid');
 const loading = document.getElementById('loading');
 const message = document.getElementById('message');

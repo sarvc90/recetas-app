@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  window.APP_CONFIG.API_BASE_URL || 'http://localhost:8080/api';
+  window.APP_CONFIG.API_BASE_URL || `${window.location.origin}/api`;
 const grid = document.getElementById('favoritosGrid');
 const loading = document.getElementById('loading');
 const message = document.getElementById('message');
