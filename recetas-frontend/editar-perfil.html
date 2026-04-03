@@ -3,11 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editar Perfil - El Rincón de los Sabores</title>
+    <meta
+      name="description"
+      content="Edita tu perfil y administra la verificación de correo en El Rincón de los Sabores."
+    />
+    <meta
+      property="og:title"
+      content="El Rincón de los Sabores - Editar Perfil"
+    />
+    <meta
+      property="og:description"
+      content="Edita tu perfil y administra la verificación de correo."
+    />
+    <meta property="og:image" content="icon.png" />
+    <title>El Rincón de los Sabores - Editar Perfil</title>
     <link rel="stylesheet" href="styles-editar-perfil.css" />
   </head>
   <body>
-    <div class="container">
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
       <h1>Editar Mi Perfil</h1>
 
       <div class="content-section">
@@ -15,8 +29,22 @@
           <a href="recetas.html" class="back-btn">⬅ Volver a recetas</a>
         </div>
 
-        <div id="message" class="hidden"></div>
-        <div id="loading" class="hidden">Cargando perfil...</div>
+        <div
+          id="message"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+        <div
+          id="loading"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Cargando perfil...
+        </div>
 
         <form id="editarPerfilForm" class="perfil-form">
           <div class="foto-perfil-section">
@@ -50,12 +78,12 @@
             />
           </div>
 
-          <!-- Verificación de email -->
           <div class="form-group" id="email-verificado-section">
             <label>Estado del email</label>
             <div
               id="email-status-text"
               style="font-size: 14px; margin-top: 4px; color: #666"
+              aria-live="polite"
             ></div>
             <button
               type="button"
@@ -124,8 +152,12 @@
           </div>
         </form>
       </div>
-    </div>
+    </main>
 
-    <script src="config/env-loader.js" data-main="editar-perfil.js"></script>
+    <script
+      src="config/env-loader.js"
+      data-main="editar-perfil.js"
+      defer
+    ></script>
   </body>
 </html>

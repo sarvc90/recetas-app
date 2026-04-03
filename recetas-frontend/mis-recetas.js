@@ -61,7 +61,7 @@ async function cargarMisRecetas(usuarioId) {
     });
     if (!response.ok) throw new Error('Error al cargar tus recetas');
     const recetas = await response.json();
-    grid.innerHTML = '';
+    grid.replaceChildren();
     if (!recetas || recetas.length === 0) {
       message.textContent = 'Aún no has creado recetas 🍰';
       message.classList.remove('hidden');
@@ -79,32 +79,71 @@ async function cargarMisRecetas(usuarioId) {
 
 function renderMisRecetas(recetas) {
   recetas.forEach((receta) => {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'card';
     card.dataset.id = receta.id;
-    card.innerHTML = `
-            <img src="${receta.imagenUrl || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" alt="${receta.nombre}">
-            <h3>${receta.nombre}</h3>
-            <div class="card-actions">
-                <button class="edit-btn" data-id="${receta.id}">✏️ Editar</button>
-                <button class="delete-btn" data-id="${receta.id}">🗑 Eliminar</button>
-            </div>
-        `;
-    card.querySelector('.edit-btn').addEventListener('click', (e) => {
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute(
+      'aria-label',
+      `Ver detalle de ${receta.nombre || 'receta'}`,
+    );
+
+    const imagen = document.createElement('img');
+    imagen.src =
+      receta.imagenUrl || 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+    imagen.alt = receta.nombre || 'Receta sin nombre';
+    imagen.width = 300;
+    imagen.height = 200;
+    imagen.loading = 'lazy';
+
+    const titulo = document.createElement('h3');
+    titulo.textContent = receta.nombre || 'Receta sin nombre';
+
+    const acciones = document.createElement('div');
+    acciones.className = 'card-actions';
+
+    const editButton = document.createElement('button');
+    editButton.className = 'edit-btn';
+    editButton.type = 'button';
+    editButton.dataset.id = receta.id;
+    editButton.textContent = '✏️ Editar';
+
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-btn';
+    deleteButton.type = 'button';
+    deleteButton.dataset.id = receta.id;
+    deleteButton.textContent = '🗑 Eliminar';
+
+    editButton.addEventListener('click', (e) => {
       e.stopPropagation();
       abrirModalEdicion(receta);
     });
-    card.querySelector('.delete-btn').addEventListener('click', (e) => {
+
+    deleteButton.addEventListener('click', (e) => {
       e.stopPropagation();
       eliminarReceta(receta.id, card);
     });
+
+    acciones.append(editButton, deleteButton);
+    card.append(imagen, titulo, acciones);
+
     card.addEventListener('click', (e) => {
       if (
         !e.target.classList.contains('edit-btn') &&
         !e.target.classList.contains('delete-btn')
-      )
+      ) {
         abrirModal(receta);
+      }
     });
+
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        abrirModal(receta);
+      }
+    });
+
     grid.appendChild(card);
   });
 }
@@ -114,7 +153,7 @@ function abrirModal(receta) {
   modalDescription.textContent = receta.descripcion;
   modalImage.src =
     receta.imagenUrl || 'https://via.placeholder.com/500x300?text=Sin+Imagen';
-  modalIngredientes.innerHTML = '';
+  modalIngredientes.replaceChildren();
   const ingredientes =
     typeof receta.ingredientes === 'string'
       ? receta.ingredientes.split('\n').filter((ing) => ing.trim() !== '')
@@ -137,9 +176,16 @@ function abrirModalEdicion(receta) {
       : receta.ingredientes.join('\n');
   document.getElementById('editRecipeInstructions').value =
     receta.instrucciones;
-  editImagePreview.innerHTML = receta.imagenUrl
-    ? `<img src="${receta.imagenUrl}" alt="Preview">`
-    : '';
+  editImagePreview.replaceChildren();
+  if (receta.imagenUrl) {
+    const previewImage = document.createElement('img');
+    previewImage.src = receta.imagenUrl;
+    previewImage.alt = 'Preview';
+    previewImage.width = 300;
+    previewImage.height = 200;
+    previewImage.loading = 'lazy';
+    editImagePreview.appendChild(previewImage);
+  }
   editForm.dataset.recetaId = receta.id;
   editForm.dataset.imagenActual = receta.imagenUrl || '';
   editModal.classList.remove('hidden');
@@ -188,7 +234,7 @@ editForm.addEventListener('submit', async (e) => {
     } else {
       datos.imagenUrl = editForm.dataset.imagenActual;
     }
-    const response = await fetch(`${API_URL}/${recetaId}`, {
+    const response = await fetch(`${API_RECETAS_URL}/${recetaId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(datos),
@@ -196,7 +242,7 @@ editForm.addEventListener('submit', async (e) => {
     if (!response.ok) throw new Error('Error al actualizar la receta');
     editModal.classList.add('hidden');
     editForm.reset();
-    editImagePreview.innerHTML = '';
+    editImagePreview.replaceChildren();
     await cargarMisRecetas(usuario.id);
     message.textContent = '✅ Receta actualizada correctamente';
     message.classList.remove('hidden');
@@ -213,7 +259,14 @@ editImageInput?.addEventListener('change', (e) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      editImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+      editImagePreview.replaceChildren();
+      const previewImage = document.createElement('img');
+      previewImage.src = e.target.result;
+      previewImage.alt = 'Preview';
+      previewImage.width = 300;
+      previewImage.height = 200;
+      previewImage.loading = 'lazy';
+      editImagePreview.appendChild(previewImage);
     };
     reader.readAsDataURL(file);
   }
@@ -222,7 +275,7 @@ editImageInput?.addEventListener('change', (e) => {
 async function eliminarReceta(id, card) {
   if (!confirm('¿Seguro que deseas eliminar esta receta?')) return;
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await fetch(`${API_RECETAS_URL}/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });

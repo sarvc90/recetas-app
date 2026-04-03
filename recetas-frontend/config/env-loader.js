@@ -29,6 +29,7 @@
 
     const mainScript = document.createElement('script');
     mainScript.src = mainScriptPath;
+    mainScript.defer = true;
     document.body.appendChild(mainScript);
   };
 
@@ -38,6 +39,7 @@
 
     const mainScript = document.createElement('script');
     mainScript.src = mainScriptPath;
+    mainScript.defer = true;
     document.body.appendChild(mainScript);
   };
 

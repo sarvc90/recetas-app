@@ -9,6 +9,15 @@ const fotoActual = document.getElementById('fotoActual');
 
 let usuarioActual = null;
 
+function enmascararEmail(email) {
+  if (!email || !email.includes('@')) return '';
+
+  const [localPart, domainPart] = email.split('@');
+  if (!localPart || !domainPart) return '';
+
+  return `${localPart.charAt(0)}***@${domainPart}`;
+}
+
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
   return {
@@ -71,13 +80,17 @@ function actualizarEstadoEmail() {
   const statusText = document.getElementById('email-status-text');
   const btnSolicitar = document.getElementById('solicitar-verificacion-btn');
 
-  if (!statusText) return;
+  if (!statusText || !btnSolicitar) return;
+
+  const emailMostrado = enmascararEmail(usuarioActual.email);
 
   if (usuarioActual.emailVerificado) {
-    statusText.innerHTML = `<span style="color:#155724;">✅ Email verificado (${usuarioActual.email || ''})</span>`;
+    statusText.textContent = `✅ Email verificado${emailMostrado ? ` (${emailMostrado})` : ''}`;
+    statusText.style.color = '#155724';
     btnSolicitar.style.display = 'none';
   } else {
-    statusText.innerHTML = `<span style="color:#842029;">⚠️ Email no verificado (${usuarioActual.email || ''})</span>`;
+    statusText.textContent = `⚠️ Email no verificado${emailMostrado ? ` (${emailMostrado})` : ''}`;
+    statusText.style.color = '#842029';
     btnSolicitar.style.display = 'inline-block';
   }
 }

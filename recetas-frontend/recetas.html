@@ -3,34 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explora recetas, guarda tus favoritas y comparte comentarios en El Rincón de los Sabores."
+    />
+    <meta property="og:title" content="El Rincón de los Sabores - Recetas" />
+    <meta
+      property="og:description"
+      content="Explora recetas, guarda tus favoritas y comparte comentarios."
+    />
+    <meta property="og:image" content="icon.png" />
     <title>El Rincón de los Sabores - Recetas</title>
     <link rel="stylesheet" href="styles-recetas.css" />
   </head>
   <body>
-    <div class="container">
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
       <h1>El Rincón de los Sabores</h1>
 
       <div class="content-section">
-        <!-- Botón para agregar receta -->
         <div class="action-buttons">
-          <button id="addRecipeBtn" class="primary-btn">
+          <button id="addRecipeBtn" class="primary-btn" type="button">
             Agregar Nueva Receta
           </button>
         </div>
 
-        <!-- Barra de búsqueda -->
-        <div class="search-bar">
+        <section class="search-bar" aria-label="Buscar recetas">
+          <label for="searchInput" class="sr-only">Buscar receta</label>
           <input
             type="text"
             id="searchInput"
             placeholder="Buscar recetas por nombre o descripción..."
           />
-          <button id="searchBtn">Buscar</button>
-        </div>
+          <button id="searchBtn" type="button">Buscar</button>
+        </section>
 
-        <!-- Formulario de nueva receta (oculto por defecto) -->
-        <div id="recipeForm" class="recipe-form hidden">
-          <h2>Nueva Receta</h2>
+        <section
+          id="recipeForm"
+          class="recipe-form hidden"
+          aria-labelledby="recipe-form-title"
+        >
+          <h2 id="recipe-form-title">Nueva Receta</h2>
           <form id="newRecipeForm">
             <div class="form-group">
               <label for="recipeName">Nombre de la receta:</label>
@@ -43,7 +56,11 @@
             <div class="form-group">
               <label for="recipeImage">Imagen:</label>
               <input type="file" id="recipeImage" accept="image/*" />
-              <div id="imagePreview" class="image-preview"></div>
+              <div
+                id="imagePreview"
+                class="image-preview"
+                aria-live="polite"
+              ></div>
             </div>
             <div class="form-group">
               <label for="recipeIngredients"
@@ -62,31 +79,53 @@
               </button>
             </div>
           </form>
+        </section>
+
+        <div
+          id="loading"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Cargando recetas...
         </div>
 
-        <!-- Estado de carga -->
-        <div id="loading" class="hidden">Cargando recetas...</div>
+        <div
+          id="message"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
 
-        <!-- Mensajes -->
-        <div id="message" class="hidden"></div>
+        <div id="recetasGrid" class="grid" aria-live="polite"></div>
 
-        <!-- Grid de recetas -->
-        <div id="recetasGrid" class="grid"></div>
-
-        <!-- Botón de paginación -->
         <div class="pagination">
-          <button id="loadMore" class="hidden">Cargar más</button>
+          <button id="loadMore" class="hidden" type="button">Cargar más</button>
         </div>
       </div>
-    </div>
+    </main>
 
-    <!-- Modal de detalle -->
-    <div id="modal" class="modal hidden">
+    <div
+      id="modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      aria-describedby="modalDescription"
+    >
       <div class="modal-content">
-        <span id="closeModal" class="close">&times;</span>
-        <h2 id="modalTitle"></h2>
+        <button
+          id="closeModal"
+          class="close"
+          type="button"
+          aria-label="Cerrar detalle de receta"
+        >
+          &times;
+        </button>
+        <h2 id="modalTitle">Detalle de la receta</h2>
 
-        <!-- Sección de calificación -->
         <div class="rating-section">
           <div class="rating-display">
             <span class="rating-stars" id="ratingStars">☆☆☆☆☆</span>
@@ -94,9 +133,17 @@
           </div>
         </div>
 
-        <h3 id="modalDescription"></h3>
-        <img id="modalImage" alt="Imagen receta" />
-        <button id="favBtn" class="fav-btn">🤍 Agregar a Favoritos</button>
+        <p id="modalDescription"></p>
+        <img
+          id="modalImage"
+          alt="Imagen receta"
+          width="500"
+          height="300"
+          loading="lazy"
+        />
+        <button id="favBtn" class="fav-btn" type="button">
+          🤍 Agregar a Favoritos
+        </button>
         <div class="modal-info">
           <h3>Ingredientes</h3>
           <ul id="modalIngredientes"></ul>
@@ -104,44 +151,83 @@
           <p id="modalInstrucciones"></p>
         </div>
 
-        <!-- Sección de comentarios -->
-        <div class="comments-section">
-          <h3>Comentarios y Calificaciones</h3>
+        <section class="comments-section" aria-labelledby="comments-title">
+          <h3 id="comments-title">Comentarios y Calificaciones</h3>
 
-          <!-- Formulario para agregar comentario -->
           <div id="commentForm" class="comment-form">
             <h4>Deja tu comentario</h4>
             <div class="rating-input">
               <label>Tu calificación:</label>
-              <div class="stars-input">
-                <span class="star" data-rating="1">☆</span>
-                <span class="star" data-rating="2">☆</span>
-                <span class="star" data-rating="3">☆</span>
-                <span class="star" data-rating="4">☆</span>
-                <span class="star" data-rating="5">☆</span>
+              <div
+                class="stars-input"
+                role="radiogroup"
+                aria-label="Calificación"
+              >
+                <span
+                  class="star"
+                  data-rating="1"
+                  role="button"
+                  tabindex="0"
+                  aria-label="1 estrella"
+                  >☆</span
+                >
+                <span
+                  class="star"
+                  data-rating="2"
+                  role="button"
+                  tabindex="0"
+                  aria-label="2 estrellas"
+                  >☆</span
+                >
+                <span
+                  class="star"
+                  data-rating="3"
+                  role="button"
+                  tabindex="0"
+                  aria-label="3 estrellas"
+                  >☆</span
+                >
+                <span
+                  class="star"
+                  data-rating="4"
+                  role="button"
+                  tabindex="0"
+                  aria-label="4 estrellas"
+                  >☆</span
+                >
+                <span
+                  class="star"
+                  data-rating="5"
+                  role="button"
+                  tabindex="0"
+                  aria-label="5 estrellas"
+                  >☆</span
+                >
               </div>
               <span id="selectedRating" class="selected-rating"
                 >No seleccionada</span
               >
             </div>
-            <textarea
-              id="commentText"
-              placeholder="Escribe tu comentario aquí..."
-              rows="4"
-            ></textarea>
-            <button id="submitComment" class="submit-comment-btn">
+            <div class="form-group">
+              <label for="commentText" class="sr-only">Comentario</label>
+              <textarea
+                id="commentText"
+                placeholder="Escribe tu comentario aquí..."
+                rows="4"
+              ></textarea>
+            </div>
+            <button id="submitComment" class="submit-comment-btn" type="button">
               Publicar Comentario
             </button>
           </div>
 
-          <!-- Lista de comentarios -->
-          <div id="commentsList" class="comments-list">
+          <div id="commentsList" class="comments-list" aria-live="polite">
             <p class="no-comments">Cargando comentarios...</p>
           </div>
-        </div>
+        </section>
       </div>
     </div>
 
-    <script src="config/env-loader.js" data-main="recetas.js"></script>
+    <script src="config/env-loader.js" data-main="recetas.js" defer></script>
   </body>
 </html>

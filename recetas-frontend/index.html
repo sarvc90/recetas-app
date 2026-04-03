@@ -3,16 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recetas App - Registro y Login</title>
+    <meta
+      name="description"
+      content="El Rincón de los Sabores: comparte y descubre recetas de la gastronomía colombiana."
+    />
+    <meta
+      property="og:title"
+      content="El Rincón de los Sabores - Iniciar Sesión"
+    />
+    <meta
+      property="og:description"
+      content="Comparte y descubre recetas de la gastronomía colombiana."
+    />
+    <meta property="og:image" content="icon.png" />
+    <title>El Rincón de los Sabores - Iniciar Sesión</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
-      <h1>El Rincón de los Sabores</h1>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
+      <header class="page-header">
+        <h1>El Rincón de los Sabores</h1>
+        <p class="page-subtitle">Accede con tu cuenta o crea una nueva.</p>
+      </header>
 
       <!-- SECCIÓN DE REGISTRO -->
-      <div class="form-section">
-        <h2>Registro de Usuario</h2>
+      <section class="form-section" aria-labelledby="registro-title">
+        <h2 id="registro-title">Registro de Usuario</h2>
         <div class="form-group">
           <label for="nombre">Nombre completo:</label>
           <input type="text" id="nombre" placeholder="Ej: María García" />
@@ -29,12 +46,16 @@
             placeholder="Mínimo 6 caracteres"
           />
         </div>
-        <button id="registro-btn" onclick="registrarUsuario()">
+        <button id="registro-btn" type="button" onclick="registrarUsuario()">
           Crear Cuenta
         </button>
-        <div id="resultado-registro" class="result"></div>
+        <div
+          id="resultado-registro"
+          class="result"
+          role="status"
+          aria-live="polite"
+        ></div>
 
-        <!-- Código de verificación de email (visible tras enviar el registro) -->
         <div id="verification-code-section" style="display: none">
           <div class="form-group">
             <label for="verification-code">Código de verificación:</label>
@@ -46,31 +67,25 @@
               autocomplete="one-time-code"
             />
           </div>
-          <button onclick="verificarRegistroCode()">
+          <button type="button" onclick="verificarRegistroCode()">
             Verificar y completar registro
           </button>
-          <div style="text-align: center; margin-top: 10px">
+          <div class="secondary-action">
             <a
               href="#"
               onclick="
                 cancelarRegistro();
                 return false;
               "
-              style="
-                color: #68c1e1;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 14px;
-              "
               >← Volver / Reenviar código</a
             >
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- SECCIÓN DE LOGIN -->
-      <div class="form-section">
-        <h2>Iniciar Sesión</h2>
+      <section class="form-section" aria-labelledby="login-title">
+        <h2 id="login-title">Iniciar Sesión</h2>
         <div class="form-group">
           <label for="login-email">Email:</label>
           <input type="email" id="login-email" placeholder="tu@email.com" />
@@ -83,10 +98,16 @@
             placeholder="Tu contraseña"
           />
         </div>
-        <button id="login-btn" onclick="loginUsuario()">Ingresar</button>
-        <div id="resultado-login" class="result"></div>
+        <button id="login-btn" type="button" onclick="loginUsuario()">
+          Ingresar
+        </button>
+        <div
+          id="resultado-login"
+          class="result"
+          role="status"
+          aria-live="polite"
+        ></div>
 
-        <!-- Código de autenticación 2FA (visible tras primer envío) -->
         <div id="auth-code-section" style="display: none">
           <div class="form-group">
             <label for="auth-code">Código de autenticación:</label>
@@ -98,40 +119,33 @@
               autocomplete="one-time-code"
             />
           </div>
-          <button onclick="verificarAuthCode()">Verificar código</button>
-          <div style="text-align: center; margin-top: 10px">
+          <button type="button" onclick="verificarAuthCode()">
+            Verificar código
+          </button>
+          <div class="secondary-action">
             <a
               href="#"
               onclick="
                 cancelarLogin();
                 return false;
               "
-              style="
-                color: #68c1e1;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 14px;
-              "
               >← Volver / Reenviar código</a
             >
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 15px">
-          <a
-            href="recuperar-password.html"
-            style="
-              color: #68c1e1;
-              text-decoration: none;
-              font-weight: bold;
-              font-size: 14px;
-            "
-            >¿Olvidaste tu contraseña?</a
-          >
+        <div class="secondary-action secondary-action--spaced">
+          <a href="recuperar-password.html">¿Olvidaste tu contraseña?</a>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <script src="config/env-loader.js" data-main="script.js"></script>
+      <footer class="page-footer">
+        <p class="security-note">
+          © El Rincón de los Sabores - 2026.
+        </p>
+      </footer>
+    </main>
+
+    <script src="config/env-loader.js" data-main="script.js" defer></script>
   </body>
 </html>

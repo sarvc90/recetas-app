@@ -14,8 +14,12 @@ let registroPendingData = null; // { nombre, email, password }
 // ─── Utilidades UI ──────────────────────────────────────────────────────────
 function mostrarResultado(elementId, mensaje, tipo) {
   const elemento = document.getElementById(elementId);
-  elemento.innerHTML = mensaje;
-  elemento.className = `result ${tipo}`;
+  if (!elemento) return;
+
+  elemento.textContent = mensaje;
+  elemento.className = `result ${tipo}`.trim();
+  elemento.setAttribute('role', tipo === 'error' ? 'alert' : 'status');
+  elemento.setAttribute('aria-live', 'polite');
 }
 
 function limpiarFormularios() {
@@ -24,6 +28,15 @@ function limpiarFormularios() {
   document.getElementById('password').value = '';
   document.getElementById('login-email').value = '';
   document.getElementById('login-password').value = '';
+}
+
+function guardarSesion(usuario) {
+  if (!usuario) return;
+
+  localStorage.setItem('usuario', JSON.stringify(usuario));
+  if (usuario.token) {
+    localStorage.setItem('token', usuario.token);
+  }
 }
 
 async function postJson(url, payload) {
@@ -146,8 +159,7 @@ async function verificarAuthCode() {
       );
 
       document.getElementById('auth-code').value = '';
-      localStorage.setItem('usuario', JSON.stringify(usuario));
-      localStorage.setItem('token', usuario.token || '');
+      guardarSesion(usuario);
       loginPending = false;
 
       setTimeout(() => {
@@ -301,8 +313,7 @@ async function verificarRegistroCode() {
         'success',
       );
 
-      localStorage.setItem('usuario', JSON.stringify(usuario));
-      localStorage.setItem('token', usuario.token || '');
+      guardarSesion(usuario);
       registroPending = false;
       registroPendingData = null;
       limpiarFormularios();

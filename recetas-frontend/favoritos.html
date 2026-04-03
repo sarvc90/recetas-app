@@ -3,11 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mis Favoritos - El Rincón de los Sabores</title>
+    <meta
+      name="description"
+      content="Revisa y administra tus recetas favoritas en El Rincón de los Sabores."
+    />
+    <meta property="og:title" content="El Rincón de los Sabores - Favoritos" />
+    <meta
+      property="og:description"
+      content="Revisa y administra tus recetas favoritas."
+    />
+    <meta property="og:image" content="icon.png" />
+    <title>El Rincón de los Sabores - Favoritos</title>
     <link rel="stylesheet" href="styles-favoritos.css" />
   </head>
   <body>
-    <div class="container">
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
       <h1>Mis Recetas Favoritas</h1>
 
       <div class="content-section">
@@ -17,21 +28,56 @@
           >
         </div>
 
-        <div id="message" class="hidden"></div>
-        <div id="loading" class="hidden">Cargando tus favoritos...</div>
+        <div
+          id="message"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+        <div
+          id="loading"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Cargando tus favoritos...
+        </div>
 
-        <div id="favoritosGrid" class="grid"></div>
+        <div id="favoritosGrid" class="grid" aria-live="polite"></div>
       </div>
-    </div>
+    </main>
 
-    <!-- Modal de detalle -->
-    <div id="modal" class="modal hidden">
+    <div
+      id="modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      aria-describedby="modalDescription"
+    >
       <div class="modal-content">
-        <span id="closeModal" class="close">&times;</span>
-        <h2 id="modalTitle"></h2>
-        <h3 id="modalDescription"></h3>
-        <img id="modalImage" alt="Imagen receta" />
-        <button id="favBtn" class="fav-btn">❤️ Quitar de Favoritos</button>
+        <button
+          id="closeModal"
+          class="close"
+          type="button"
+          aria-label="Cerrar detalle de receta"
+        >
+          &times;
+        </button>
+        <h2 id="modalTitle">Detalle de la receta</h2>
+        <p id="modalDescription"></p>
+        <img
+          id="modalImage"
+          alt="Imagen receta"
+          width="500"
+          height="300"
+          loading="lazy"
+        />
+        <button id="favBtn" class="fav-btn" type="button">
+          ❤️ Quitar de Favoritos
+        </button>
         <div class="modal-info">
           <h3>Ingredientes</h3>
           <ul id="modalIngredientes"></ul>
@@ -41,6 +87,6 @@
       </div>
     </div>
 
-    <script src="config/env-loader.js" data-main="favoritos.js"></script>
+    <script src="config/env-loader.js" data-main="favoritos.js" defer></script>
   </body>
 </html>

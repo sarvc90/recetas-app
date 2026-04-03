@@ -51,6 +51,18 @@ const selectedRatingText = document.getElementById('selectedRating');
 const ratingStars = document.getElementById('ratingStars');
 const ratingText = document.getElementById('ratingText');
 
+function getStoredUsuario() {
+  const rawUsuario = localStorage.getItem('usuario');
+  if (!rawUsuario) return null;
+
+  try {
+    return JSON.parse(rawUsuario);
+  } catch (error) {
+    console.error('No se pudo leer el usuario guardado:', error);
+    return null;
+  }
+}
+
 // ================== EVENT LISTENERS ==================
 closeModal?.addEventListener('click', () => {
   modal.classList.add('hidden');
@@ -69,7 +81,7 @@ addRecipeBtn?.addEventListener('click', () =>
 cancelRecipeBtn?.addEventListener('click', () => {
   recipeForm.classList.add('hidden');
   newRecipeForm.reset();
-  imagePreview.innerHTML = '';
+  imagePreview.replaceChildren();
 });
 
 document.getElementById('searchBtn')?.addEventListener('click', buscarRecetas);
@@ -96,6 +108,13 @@ starsInput.forEach((star) => {
   star.addEventListener('click', () => {
     selectedRating = parseInt(star.dataset.rating);
     updateStarsInput();
+  });
+  star.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectedRating = parseInt(star.dataset.rating);
+      updateStarsInput();
+    }
   });
   star.addEventListener('mouseenter', () => {
     highlightStars(parseInt(star.dataset.rating));
@@ -151,16 +170,22 @@ async function cargarComentarios(recetaId) {
 
       if (comentarios && comentarios.length > 0) {
         renderComentarios(comentarios);
-      } else {
-        commentsList.innerHTML =
-          '<p class="no-comments">Sé el primero en comentar esta receta</p>';
+      } else if (commentsList) {
+        commentsList.replaceChildren();
+        const emptyState = document.createElement('p');
+        emptyState.className = 'no-comments';
+        emptyState.textContent = 'Sé el primero en comentar esta receta';
+        commentsList.appendChild(emptyState);
       }
     }
   } catch (error) {
     console.error('Error al cargar comentarios:', error);
     if (commentsList) {
-      commentsList.innerHTML =
-        '<p class="no-comments">Error al cargar comentarios</p>';
+      commentsList.replaceChildren();
+      const errorState = document.createElement('p');
+      errorState.className = 'no-comments';
+      errorState.textContent = 'Error al cargar comentarios';
+      commentsList.appendChild(errorState);
     }
   }
 }
@@ -181,44 +206,63 @@ function mostrarCalificacionPromedio(promedio, total) {
 }
 
 function renderComentarios(comentarios) {
+  if (!commentsList) return;
+
+  commentsList.replaceChildren();
+
   if (!comentarios || comentarios.length === 0) {
-    if (commentsList) {
-      commentsList.innerHTML =
-        '<p class="no-comments">Sé el primero en comentar esta receta</p>';
-    }
+    const emptyState = document.createElement('p');
+    emptyState.className = 'no-comments';
+    emptyState.textContent = 'Sé el primero en comentar esta receta';
+    commentsList.appendChild(emptyState);
     return;
   }
 
-  if (commentsList) {
-    commentsList.innerHTML = comentarios
-      .map((comentario) => {
-        const fecha = new Date(comentario.fechaCreacion);
-        const fechaFormateada = fecha.toLocaleDateString('es-ES', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        });
+  const fragment = document.createDocumentFragment();
 
-        let estrellasComentario = '';
-        for (let i = 1; i <= 5; i++) {
-          estrellasComentario += i <= comentario.calificacion ? '★' : '☆';
-        }
+  comentarios.forEach((comentario) => {
+    const fecha = new Date(comentario.fechaCreacion);
+    const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
-        return `
-                <div class="comment-item">
-                    <div class="comment-header">
-                        <span class="comment-author">${comentario.nombreUsuario}</span>
-                        <span class="comment-rating">${estrellasComentario}</span>
-                    </div>
-                    <p class="comment-text">${comentario.texto}</p>
-                    <span class="comment-date">${fechaFormateada}</span>
-                </div>
-            `;
-      })
-      .join('');
-  }
+    let estrellasComentario = '';
+    for (let i = 1; i <= 5; i++) {
+      estrellasComentario += i <= comentario.calificacion ? '★' : '☆';
+    }
+
+    const commentItem = document.createElement('article');
+    commentItem.className = 'comment-item';
+
+    const commentHeader = document.createElement('div');
+    commentHeader.className = 'comment-header';
+
+    const commentAuthor = document.createElement('span');
+    commentAuthor.className = 'comment-author';
+    commentAuthor.textContent = comentario.nombreUsuario || 'Usuario';
+
+    const commentRating = document.createElement('span');
+    commentRating.className = 'comment-rating';
+    commentRating.textContent = estrellasComentario;
+
+    const commentTextElement = document.createElement('p');
+    commentTextElement.className = 'comment-text';
+    commentTextElement.textContent = comentario.texto || '';
+
+    const commentDate = document.createElement('span');
+    commentDate.className = 'comment-date';
+    commentDate.textContent = fechaFormateada;
+
+    commentHeader.append(commentAuthor, commentRating);
+    commentItem.append(commentHeader, commentTextElement, commentDate);
+    fragment.appendChild(commentItem);
+  });
+
+  commentsList.appendChild(fragment);
 }
 
 async function submitComment() {
@@ -329,7 +373,7 @@ async function fetchRecetas(page = 0) {
     const data = await response.json();
     const recetas = data.content || data;
 
-    if (page === 0) recetasGrid.innerHTML = '';
+    if (page === 0) recetasGrid.replaceChildren();
 
     if (!recetas || recetas.length === 0) {
       if (page === 0) {
@@ -362,18 +406,38 @@ async function fetchRecetas(page = 0) {
 // ================== RENDERIZAR RECETAS ==================
 function renderRecetas(recetas) {
   recetas.forEach((receta) => {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'card';
     card.dataset.id = receta.id;
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute(
+      'aria-label',
+      `Ver detalle de ${receta.nombre || 'receta'}`,
+    );
 
-    card.innerHTML = `
-            <img src="${receta.imagenUrl || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}"
-                 alt="${receta.nombre || 'Receta sin nombre'}">
-            <h3>${receta.nombre || 'Receta sin nombre'}</h3>
-            <p>${receta.descripcion || 'Sin descripción'}</p>
-        `;
+    const imagen = document.createElement('img');
+    imagen.src =
+      receta.imagenUrl || 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+    imagen.alt = receta.nombre || 'Receta sin nombre';
+    imagen.width = 300;
+    imagen.height = 200;
+    imagen.loading = 'lazy';
 
+    const titulo = document.createElement('h3');
+    titulo.textContent = receta.nombre || 'Receta sin nombre';
+
+    const descripcion = document.createElement('p');
+    descripcion.textContent = receta.descripcion || 'Sin descripción';
+
+    card.append(imagen, titulo, descripcion);
     card.addEventListener('click', () => openModal(receta));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openModal(receta);
+      }
+    });
     recetasGrid.appendChild(card);
   });
 }
@@ -385,7 +449,7 @@ function openModal(receta) {
   modalImage.src =
     receta.imagenUrl || 'https://via.placeholder.com/500x300?text=Sin+Imagen';
 
-  modalIngredientes.innerHTML = '';
+  modalIngredientes.replaceChildren();
   let ingredientes = [];
   if (typeof receta.ingredientes === 'string') {
     ingredientes = receta.ingredientes
@@ -485,7 +549,7 @@ newRecipeForm?.addEventListener('submit', async (e) => {
 
     recipeForm.classList.add('hidden');
     newRecipeForm.reset();
-    imagePreview.innerHTML = '';
+    imagePreview.replaceChildren();
 
     message.textContent = '✅ Receta creada correctamente';
     message.classList.remove('hidden');
@@ -521,7 +585,7 @@ async function buscarRecetas() {
   try {
     loading.classList.remove('hidden');
     message.classList.add('hidden');
-    recetasGrid.innerHTML = '';
+    recetasGrid.replaceChildren();
 
     const response = await fetch(
       `${API_RECETAS_URL}/buscar?termino=${encodeURIComponent(termino)}`,
@@ -557,47 +621,82 @@ async function buscarRecetas() {
 async function initApp() {
   console.log('Iniciando aplicación...');
 
-  const usuario = localStorage.getItem('usuario');
-  if (!usuario) {
+  const usuarioData = getStoredUsuario();
+  if (!usuarioData) {
     window.location.href = 'index.html';
     return;
   }
 
-  const usuarioData = JSON.parse(usuario);
   const fotoPerfil =
     usuarioData.fotoPerfil || localStorage.getItem('usuarioFoto');
 
   const container = document.querySelector('.container');
   if (container) {
-    const header = document.createElement('div');
+    const header = document.createElement('header');
     header.className = 'header';
 
-    let fotoHTML = '';
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+
+    const userProfile = document.createElement('div');
+    userProfile.className = 'user-profile';
+
     if (fotoPerfil) {
-      fotoHTML = `<img src="${fotoPerfil}" alt="Foto de perfil" class="user-photo">`;
+      const userPhoto = document.createElement('img');
+      userPhoto.src = fotoPerfil;
+      userPhoto.alt = 'Foto de perfil';
+      userPhoto.className = 'user-photo';
+      userPhoto.width = 56;
+      userPhoto.height = 56;
+      userProfile.appendChild(userPhoto);
     } else {
-      fotoHTML = `<div class="user-photo-placeholder">
-                <img src="icon.png" alt="Usuario" style="width: 70%; height: 70%; object-fit: cover;">
-            </div>`;
+      const placeholder = document.createElement('div');
+      placeholder.className = 'user-photo-placeholder';
+      const fallback = document.createElement('img');
+      fallback.src = 'icon.png';
+      fallback.alt = 'Usuario';
+      fallback.width = 56;
+      fallback.height = 56;
+      fallback.style.width = '70%';
+      fallback.style.height = '70%';
+      fallback.style.objectFit = 'cover';
+      placeholder.appendChild(fallback);
+      userProfile.appendChild(placeholder);
     }
 
-    header.innerHTML = `
-            <div class="user-info">
-                <div class="user-profile">
-                    ${fotoHTML}
-                    <span class="user-name">Bienvenido, ${usuarioData.nombre}</span>
-                </div>
-                <div class="nav-buttons">
-                    <a href="mis-recetas.html" class="nav-btn">Mis Recetas</a>
-                    <a href="favoritos.html" class="nav-btn">❤️ Favoritos</a>
-                    <a href="editar-perfil.html" class="nav-btn">✏️ Editar perfil</a>
-                    <button id="logout" class="logout-btn">Cerrar Sesión</button>
-                </div>
-            </div>
-        `;
+    const userName = document.createElement('span');
+    userName.className = 'user-name';
+    userName.textContent = `Bienvenido, ${usuarioData.nombre || 'Usuario'}`;
+    userProfile.appendChild(userName);
+
+    const navButtons = document.createElement('nav');
+    navButtons.className = 'nav-buttons';
+    navButtons.setAttribute('aria-label', 'Acciones de cuenta');
+
+    [
+      { href: 'mis-recetas.html', label: 'Mis Recetas' },
+      { href: 'favoritos.html', label: '❤️ Favoritos' },
+      { href: 'editar-perfil.html', label: '✏️ Editar perfil' },
+    ].forEach(({ href, label }) => {
+      const link = document.createElement('a');
+      link.href = href;
+      link.className = 'nav-btn';
+      link.textContent = label;
+      navButtons.appendChild(link);
+    });
+
+    const logoutButton = document.createElement('button');
+    logoutButton.id = 'logout';
+    logoutButton.className = 'logout-btn';
+    logoutButton.type = 'button';
+    logoutButton.textContent = 'Cerrar Sesión';
+    navButtons.appendChild(logoutButton);
+
+    userInfo.append(userProfile, navButtons);
+    header.appendChild(userInfo);
     container.insertBefore(header, container.firstChild);
 
-    document.getElementById('logout')?.addEventListener('click', () => {
+    logoutButton.addEventListener('click', () => {
       localStorage.removeItem('usuario');
       localStorage.removeItem('token');
       window.location.href = 'index.html';
