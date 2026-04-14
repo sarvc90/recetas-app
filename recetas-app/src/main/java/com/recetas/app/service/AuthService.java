@@ -12,6 +12,8 @@ import com.recetas.app.entity.Usuario;
 import com.recetas.app.repository.CodigoRecuperacionRepository;
 import com.recetas.app.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -277,6 +279,33 @@ public class AuthService {
         }
         String normalized = code.trim();
         return normalized.isEmpty() ? null : normalized;
+    }
+
+    public ApiResponse<UsuarioResponse> getUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ApiResponse<>(false, "No hay una sesión activa");
+        }
+
+        String email = (String) authentication.getPrincipal();
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+
+        if (usuarioOpt.isEmpty()) {
+            return new ApiResponse<>(false, "Usuario no encontrado");
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        UsuarioResponse usuarioResponse = new UsuarioResponse(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getFotoPerfil(),
+                null
+        );
+        usuarioResponse.setEmailVerificado(usuario.isEmailVerificado());
+
+        return new ApiResponse<>(true, "Usuario obtenido exitosamente", usuarioResponse);
     }
 
     private String extraerMensajeEmail(Exception exception) {
