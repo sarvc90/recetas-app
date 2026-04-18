@@ -7,10 +7,8 @@ import com.recetas.app.repository.RecetaRepository;
 import com.recetas.app.repository.UsuarioRepository;
 import com.recetas.app.service.ImageService;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import com.recetas.app.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -88,12 +86,22 @@ public class RecetaController {
   @PutMapping("/{id}")
   public ResponseEntity<?> actualizarReceta(
     @PathVariable Long id,
-    @RequestBody Receta recetaActualizada
+    @RequestBody Receta recetaActualizada,
+    @RequestHeader("Authorization") String token
   ) {
-    return recetaRepository
-      .findById(id)
-      .<ResponseEntity<?>>map(receta -> {
-        receta.setNombre(recetaActualizada.getNombre());
+
+      Long usuarioId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+
+      return recetaRepository.findById(id)
+              .<ResponseEntity<?>>map(receta -> {
+
+                  // 🔴 VALIDACIÓN DE SEGURIDAD
+                  if (!receta.getUsuarioId().equals(usuarioId)) {
+                      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                              .body(new ApiResponse<>(false, "No tienes permiso para actualizar esta receta"));
+                  }
+
+                  receta.setNombre(recetaActualizada.getNombre());
         receta.setDescripcion(recetaActualizada.getDescripcion());
         receta.setIngredientes(recetaActualizada.getIngredientes());
         receta.setInstrucciones(recetaActualizada.getInstrucciones());
@@ -112,32 +120,29 @@ public class RecetaController {
 
   // ✅ Eliminar receta
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> eliminarReceta(
+  public ResponseEntity<ApiResponse<Object>> eliminarReceta(
           @PathVariable Long id,
           @RequestHeader("Authorization") String token) {
 
-    String jwt = token.replace("Bearer ", "");
-    String emailUsuario = jwtUtil.getEmailFromToken(jwt);
-    Usuario usuarioActual = usuarioRepository.findByEmail(emailUsuario).orElse(null);
+      String jwt = token.replace("Bearer ", "");
+      String emailUsuario = jwtUtil.getEmailFromToken(jwt);
 
-    return recetaRepository
-            .findById(id)
-            .<ResponseEntity<?>>map(receta -> {
-              if (!receta.getUsuarioId().equals(usuarioActual.getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                        new ApiResponse(false, "No tienes permiso para eliminar esta receta")
-                );
-              }
-              recetaRepository.deleteById(id);
-              return ResponseEntity.ok(
-                      new ApiResponse(true, "Receta eliminada correctamente")
-              );
-            })
-            .orElseGet(() ->
-                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                            new ApiResponse(false, "Receta no encontrada")
-                    )
-            );
+      Usuario usuarioActual = usuarioRepository.findByEmail(emailUsuario)
+              .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
+
+      Receta receta = recetaRepository.findById(id)
+              .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
+
+      // 🔐 Validación de seguridad
+      if (!receta.getUsuarioId().equals(usuarioActual.getId())) {
+          throw new SecurityException("No tienes permiso para eliminar esta receta");
+      }
+
+      recetaRepository.deleteById(id);
+
+      return ResponseEntity.ok(
+              new ApiResponse<>(true, "Receta eliminada correctamente", null)
+      );
   }
 
   // ✅ Obtener recetas por usuario (todas)
