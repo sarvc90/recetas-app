@@ -3,13 +3,15 @@ package com.recetas.app.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import jakarta.validation.constraints.Pattern;
 public class LoginRequest {
     @Email(message = "Email debe ser válido")
     @NotBlank(message = "Email es obligatorio")
+    @Pattern(regexp = "^\\S+$", message = "El email no debe contener espacios en blanco")
     private String email;
 
     @NotBlank(message = "Password es obligatorio")
+    @Pattern(regexp = "^\\S+$", message = "La contraseña no debe contener espacios en blanco")
     private String password;
 
     @Size(min = 6, max = 6, message = "Auth code debe tener exactamente 6 caracteres")

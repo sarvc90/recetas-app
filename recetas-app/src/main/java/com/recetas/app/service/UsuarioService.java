@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -38,192 +36,125 @@ public class UsuarioService {
     private CodeGenerationService codeGenerationService;
 
     public ApiResponse<UsuarioResponse> obtenerPerfil(Long usuarioId) {
-        try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-            if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Usuario no encontrado");
-            }
-
-            Usuario usuario = usuarioOpt.get();
-            UsuarioResponse response = new UsuarioResponse(
-                    usuario.getId(),
-                    usuario.getNombre(),
-                    usuario.getEmail(),
-                    usuario.getFotoPerfil()
-            );
-            response.setEmailVerificado(usuario.isEmailVerificado());
-
-            return new ApiResponse<>(true, "Perfil obtenido exitosamente", response);
-
-        } catch (Exception e) {
-            System.out.println("Error al obtener perfil: " + e.getMessage());
-            return new ApiResponse<>(false, "Error interno del servidor");
-        }
+        UsuarioResponse response = buildUsuarioResponse(usuario);
+        return new ApiResponse<>(true, "Perfil obtenido exitosamente", response);
     }
 
     public ApiResponse<UsuarioResponse> actualizarPerfil(Long usuarioId, EditarUsuarioRequest request) {
-        try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-            if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Usuario no encontrado");
-            }
+        usuario.setNombre(request.getNombre());
 
-            Usuario usuario = usuarioOpt.get();
-
-            // Actualizar nombre
-            usuario.setNombre(request.getNombre());
-
-            // Actualizar foto si se proporcionó
-            if (request.getFotoPerfil() != null && !request.getFotoPerfil().isEmpty()) {
-                usuario.setFotoPerfil(request.getFotoPerfil());
-            }
-
-            // Guardar cambios
-            Usuario usuarioActualizado = usuarioRepository.save(usuario);
-
-            // Crear respuesta
-            UsuarioResponse response = new UsuarioResponse(
-                    usuarioActualizado.getId(),
-                    usuarioActualizado.getNombre(),
-                    usuarioActualizado.getEmail(),
-                    usuarioActualizado.getFotoPerfil()
-            );
-            response.setEmailVerificado(usuarioActualizado.isEmailVerificado());
-
-            return new ApiResponse<>(true, "Perfil actualizado exitosamente", response);
-
-        } catch (Exception e) {
-            System.out.println("Error al actualizar perfil: " + e.getMessage());
-            return new ApiResponse<>(false, "Error interno del servidor");
+        if (request.getFotoPerfil() != null && !request.getFotoPerfil().isEmpty()) {
+            usuario.setFotoPerfil(request.getFotoPerfil());
         }
+
+        Usuario usuarioActualizado = usuarioRepository.save(usuario);
+        return new ApiResponse<>(true, "Perfil actualizado exitosamente", buildUsuarioResponse(usuarioActualizado));
     }
 
     public ApiResponse<String> subirFotoPerfil(Long usuarioId, MultipartFile file) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("El archivo debe ser una imagen");
+        }
+
         try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
-
-            if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Usuario no encontrado");
-            }
-
-            // Validar que sea una imagen
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                return new ApiResponse<>(false, "El archivo debe ser una imagen");
-            }
-
-            // Subir imagen a Cloudinary
             String imageUrl = imageService.uploadImage(file);
-
-            // Actualizar usuario con la nueva foto
-            Usuario usuario = usuarioOpt.get();
             usuario.setFotoPerfil(imageUrl);
             usuarioRepository.save(usuario);
-
             return new ApiResponse<>(true, "Foto subida exitosamente", imageUrl);
-
-        } catch (IOException e) {
-            System.out.println("Error al subir foto: " + e.getMessage());
-            return new ApiResponse<>(false, "Error al subir la imagen");
         } catch (Exception e) {
-            System.out.println("Error interno: " + e.getMessage());
-            return new ApiResponse<>(false, "Error interno del servidor");
+            throw new RuntimeException("Error al subir la imagen: " + e.getMessage());
         }
     }
 
     public ApiResponse<Void> solicitarVerificacionEmail(Long usuarioId) {
-        try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-            if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Usuario no encontrado");
-            }
-
-            Usuario usuario = usuarioOpt.get();
-
-            if (usuario.isEmailVerificado()) {
-                return new ApiResponse<>(false, "El email ya está verificado");
-            }
-
-            // Invalidar códigos anteriores del mismo tipo
-            List<Codigo> codigosAnteriores = codigoRecuperacionRepository.findByUsuarioAndUsadoFalse(usuario);
-            for (Codigo c : codigosAnteriores) {
-                if (TipoCodigo.VERIFICACION_EMAIL.equals(c.getTipo())) {
-                    c.setUsado(true);
-                }
-            }
-            codigoRecuperacionRepository.saveAll(codigosAnteriores);
-
-            String codigo = codeGenerationService.generarCodigo();
-            Codigo codigoVerificacion = new Codigo(codigo, usuario, MINUTOS_EXPIRACION, TipoCodigo.VERIFICACION_EMAIL);
-            codigoRecuperacionRepository.save(codigoVerificacion);
-
-            EmailDto emailDto = new EmailDto(
-                    "Verificación de email - RecetasApp",
-                    "Hola " + usuario.getNombre() + ",\n\n"
-                            + "Usa el siguiente código para verificar tu email:\n\n"
-                            + "Código de verificación: " + codigo + "\n\n"
-                            + "Este código es válido por " + MINUTOS_EXPIRACION + " minutos.\n\n"
-                            + "Si no solicitaste esto, ignora este mensaje.",
-                    usuario.getEmail()
-            );
-
-            emailService.sendMail(emailDto);
-
-            return new ApiResponse<>(true, "Código de verificación enviado a tu correo");
-
-        } catch (Exception e) {
-            System.out.println("Error al solicitar verificación de email: " + e.getMessage());
-            return new ApiResponse<>(false, "No se pudo enviar el código: " + e.getMessage());
+        if (usuario.isEmailVerificado()) {
+            throw new IllegalArgumentException("El email ya está verificado");
         }
+
+        List<Codigo> codigosAnteriores = codigoRecuperacionRepository.findByUsuarioAndUsadoFalse(usuario);
+        codigosAnteriores.stream()
+                .filter(c -> TipoCodigo.VERIFICACION_EMAIL.equals(c.getTipo()))
+                .forEach(c -> c.setUsado(true));
+        codigoRecuperacionRepository.saveAll(codigosAnteriores);
+
+        String codigo = codeGenerationService.generarCodigo();
+        Codigo codigoVerificacion = new Codigo(codigo, usuario, MINUTOS_EXPIRACION, TipoCodigo.VERIFICACION_EMAIL);
+        codigoRecuperacionRepository.save(codigoVerificacion);
+
+        EmailDto emailDto = new EmailDto(
+                "Verificación de email - RecetasApp",
+                "Hola " + usuario.getNombre() + ",\n\n"
+                        + "Usa el siguiente código para verificar tu email:\n\n"
+                        + "Código de verificación: " + codigo + "\n\n"
+                        + "Este código es válido por " + MINUTOS_EXPIRACION + " minutos.\n\n"
+                        + "Si no solicitaste esto, ignora este mensaje.",
+                usuario.getEmail()
+        );
+
+        try {
+            emailService.sendMail(emailDto);
+        } catch (Exception e) {
+            codigoVerificacion.setUsado(true);
+            codigoRecuperacionRepository.save(codigoVerificacion);
+            throw new RuntimeException("No se pudo enviar el código: " + e.getMessage());
+        }
+
+        return new ApiResponse<>(true, "Código de verificación enviado a tu correo");
     }
 
     public ApiResponse<Void> verificarEmail(Long usuarioId, String codigo) {
-        try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-            if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Usuario no encontrado");
-            }
+        if (usuario.isEmailVerificado()) {
+            throw new IllegalArgumentException("El email ya está verificado");
+        }
 
-            Usuario usuario = usuarioOpt.get();
+        Codigo codigoEntity = codigoRecuperacionRepository
+                .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.VERIFICACION_EMAIL)
+                .orElseThrow(() -> new IllegalArgumentException("No hay un código de verificación activo. Solicita uno nuevo"));
 
-            if (usuario.isEmailVerificado()) {
-                return new ApiResponse<>(false, "El email ya está verificado");
-            }
+        if (!codigoEntity.getCodigo().equals(codigo.trim())) {
+            throw new IllegalArgumentException("El código de verificación es incorrecto");
+        }
 
-            Optional<Codigo> codigoOpt = codigoRecuperacionRepository
-                    .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.VERIFICACION_EMAIL);
-
-            if (codigoOpt.isEmpty()) {
-                return new ApiResponse<>(false, "No hay un código de verificación activo. Solicita uno nuevo");
-            }
-
-            Codigo codigoEntity = codigoOpt.get();
-
-            if (!codigoEntity.getCodigo().equals(codigo.trim())) {
-                return new ApiResponse<>(false, "El código de verificación es incorrecto");
-            }
-
-            if (codigoEntity.isExpirado()) {
-                codigoEntity.setUsado(true);
-                codigoRecuperacionRepository.save(codigoEntity);
-                return new ApiResponse<>(false, "El código ha expirado. Solicita uno nuevo");
-            }
-
+        if (codigoEntity.isExpirado()) {
             codigoEntity.setUsado(true);
             codigoRecuperacionRepository.save(codigoEntity);
-
-            usuario.setEmailVerificado(true);
-            usuarioRepository.save(usuario);
-
-            return new ApiResponse<>(true, "Email verificado correctamente");
-
-        } catch (Exception e) {
-            System.out.println("Error al verificar email: " + e.getMessage());
-            return new ApiResponse<>(false, "Error interno del servidor");
+            throw new IllegalArgumentException("El código ha expirado. Solicita uno nuevo");
         }
+
+        codigoEntity.setUsado(true);
+        codigoRecuperacionRepository.save(codigoEntity);
+
+        usuario.setEmailVerificado(true);
+        usuarioRepository.save(usuario);
+
+        return new ApiResponse<>(true, "Email verificado correctamente");
+    }
+
+    // ================== HELPER ==================
+    private UsuarioResponse buildUsuarioResponse(Usuario usuario) {
+        UsuarioResponse response = new UsuarioResponse(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getFotoPerfil()
+        );
+        response.setEmailVerificado(usuario.isEmailVerificado());
+        return response;
     }
 }

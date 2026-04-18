@@ -7,6 +7,8 @@ import com.recetas.app.repository.RecetaRepository;
 import com.recetas.app.repository.UsuarioRepository;
 import com.recetas.app.service.ImageService;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.recetas.app.config.JwtUtil;
@@ -36,11 +38,22 @@ public class RecetaController {
   @Autowired
   private UsuarioRepository usuarioRepository;
 
-  // ✅ Obtener todas las recetas (paginadas)
+ /* // ✅ Obtener todas las recetas (paginadas)
   @GetMapping
   public Page<Receta> getAllRecetas(Pageable pageable) {
     return recetaRepository.findAll(pageable);
-  }
+  }*/
+ @GetMapping
+ public ResponseEntity<Map<String, Object>> getAllRecetas(Pageable pageable) {
+     Page<Receta> page = recetaRepository.findAll(pageable);
+     Map<String, Object> response = new LinkedHashMap<>();
+     response.put("content", new ArrayList<>(page.getContent()));
+     response.put("totalElements", page.getTotalElements());
+     response.put("totalPages", page.getTotalPages());
+     response.put("number", page.getNumber());
+     response.put("size", page.getSize());
+     return ResponseEntity.ok(response);
+ }
 
   // ✅ Crear nueva receta
   @PostMapping

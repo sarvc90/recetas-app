@@ -43,118 +43,91 @@ public class AuthService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    // ================== LOGIN ==================
     public ApiResponse<UsuarioResponse> login(LoginRequest request) {
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Credenciales incorrectas"));
+
+        if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
+            throw new IllegalArgumentException("Credenciales incorrectas");
+        }
+
+        if (!usuario.isEmailVerificado()) {
+            throw new IllegalArgumentException("Debes verificar tu email antes de iniciar sesión");
+        }
+
+        if (request.getAuthCode() == null) {
+            enviarCodigoAutenticacion(usuario);
+            return new ApiResponse<>(true, "Si el email está registrado, recibirás un código de autenticación para completar el inicio de sesión");
+        }
+
+        validarCodigoAutenticacion(usuario, request.getAuthCode());
+
+        usuario.setUltimoAcceso(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+
+        return new ApiResponse<>(true, "Login exitoso", buildUsuarioResponse(usuario));
+    }
+
+    private void enviarCodigoAutenticacion(Usuario usuario) {
+        invalidarCodigosPorTipo(usuario, TipoCodigo.AUTENTIFICACION);
+
+        String codigo = codeGenerationService.generarCodigo();
+        Codigo codigoAutenticacion = new Codigo(codigo, usuario, MINUTOS_EXPIRACION, TipoCodigo.AUTENTIFICACION);
+        codigoRecuperacionRepository.save(codigoAutenticacion);
+
+        EmailDto emailDto = new EmailDto(
+                "Autenticacion de usuario - RecetasApp",
+                "Hola " + usuario.getNombre() + ",\n\n"
+                        + "Alguien ha intentado iniciar sesión en tu cuenta. Si fuiste tú, usa el siguiente código:\n\n"
+                        + "Código de autenticación: " + codigo + "\n\n"
+                        + "Este código es válido por " + MINUTOS_EXPIRACION + " minutos.\n\n"
+                        + "Si no fuiste tú, te recomendamos cambiar tu contraseña inmediatamente.",
+                usuario.getEmail()
+        );
+
         try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
-
-            if (usuarioOpt.isEmpty()) {
-                return new ApiResponse<>(false, "Credenciales incorrectas");
-            }
-
-            Usuario usuario = usuarioOpt.get();
-
-            if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
-                return new ApiResponse<>(false, "Credenciales incorrectas");
-            }
-
-            if (!usuario.isEmailVerificado()) {
-                return new ApiResponse<>(false, "Debes verificar tu email antes de iniciar sesión");
-            }
-
-            if (request.getAuthCode() == null) {
-                // Verificacion en dos pasos.
-                invalidarCodigosPorTipo(usuario, TipoCodigo.AUTENTIFICACION);
-
-                String codigo = codeGenerationService.generarCodigo();
-                Codigo codigoAutenticacion = new Codigo(codigo, usuario, MINUTOS_EXPIRACION, TipoCodigo.AUTENTIFICACION);
-                codigoRecuperacionRepository.save(codigoAutenticacion);
-
-                EmailDto emailDto = new EmailDto(
-                        "Autenticacion de usuario - RecetasApp",
-                        "Hola " + usuario.getNombre() + ",\n\n"
-                                + "Alguien ha intentado iniciar sesion en tu cuenta. Si fuiste tu, usa el siguiente codigo para completar el inicio de sesion:\n\n"
-                                + "Codigo de autenticacion: " + codigo + "\n\n"
-                                + "Este codigo es valido por " + MINUTOS_EXPIRACION + " minutos.\n\n"
-                                + "Si no fuiste tu, te recomendamos cambiar tu contrasena inmediatamente.",
-                        usuario.getEmail()
-                );
-
-                try {
-                    emailService.sendMail(emailDto);
-                } catch (Exception emailError) {
-                    codigoAutenticacion.setUsado(true);
-                    codigoRecuperacionRepository.save(codigoAutenticacion);
-                    return new ApiResponse<>(false, "No se pudo enviar el codigo de autenticacion: " + extraerMensajeEmail(emailError));
-                }
-
-                return new ApiResponse<>(true, "Si el email esta registrado, recibiras un codigo de autenticacion para completar el inicio de sesion");
-            }
-
-            Optional<Codigo> codigoOpt = codigoRecuperacionRepository
-                    .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.AUTENTIFICACION);
-
-            if (codigoOpt.isEmpty()) {
-                return new ApiResponse<>(false, "No hay un codigo de autenticacion activo. Solicita uno nuevo");
-            }
-
-            Codigo codigo = codigoOpt.get();
-
-            if (!TipoCodigo.AUTENTIFICACION.equals(codigo.getTipo())) {
-                return new ApiResponse<>(false, "Codigo invalido para autenticacion");
-            }
-
-            if (!codigo.getCodigo().equals(request.getAuthCode())) {
-                return new ApiResponse<>(false, "El codigo de autenticacion es incorrecto");
-            }
-
-            if (codigo.isExpirado()) {
-                codigo.setUsado(true);
-                codigoRecuperacionRepository.save(codigo);
-                return new ApiResponse<>(false, "El codigo de autenticacion ha expirado. Solicita uno nuevo");
-            }
-
-            codigo.setUsado(true);
-            codigoRecuperacionRepository.save(codigo);
-
-            usuario.setUltimoAcceso(LocalDateTime.now());
-            usuarioRepository.save(usuario);
-
-            String token = jwtUtil.generateToken(usuario.getId(), usuario.getEmail());
-
-            UsuarioResponse usuarioResponse = new UsuarioResponse(
-                    usuario.getId(),
-                    usuario.getNombre(),
-                    usuario.getEmail(),
-                    usuario.getFotoPerfil(),
-                    token
-            );
-            usuarioResponse.setEmailVerificado(usuario.isEmailVerificado());
-
-            return new ApiResponse<>(true, "Login exitoso", usuarioResponse);
-
+            emailService.sendMail(emailDto);
         } catch (Exception e) {
-            System.out.println("Error en login: " + e.getMessage());
-            e.printStackTrace();
-            return new ApiResponse<>(false, "Error interno del servidor");
+            codigoAutenticacion.setUsado(true);
+            codigoRecuperacionRepository.save(codigoAutenticacion);
+            throw new IllegalArgumentException("No se pudo enviar el código de autenticación: " + extraerMensajeEmail(e));
         }
     }
 
-    public ApiResponse<UsuarioResponse> registro(RegistroRequest request) {
-        try {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
-            String verificationCode = normalizarCodigo(request.getVerificationCode());
+    private void validarCodigoAutenticacion(Usuario usuario, String authCode) {
+        Codigo codigo = codigoRecuperacionRepository
+                .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.AUTENTIFICACION)
+                .orElseThrow(() -> new IllegalArgumentException("No hay un código de autenticación activo. Solicita uno nuevo"));
 
-            if (verificationCode == null) {
-                return iniciarRegistroConVerificacion(request, usuarioOpt);
-            }
-
-            return confirmarRegistroConCodigo(request, usuarioOpt, verificationCode);
-
-        } catch (Exception e) {
-            System.out.println("Error en registro: " + e.getMessage());
-            e.printStackTrace();
-            return new ApiResponse<>(false, "Error interno del servidor");
+        if (!TipoCodigo.AUTENTIFICACION.equals(codigo.getTipo())) {
+            throw new IllegalArgumentException("Código inválido para autenticación");
         }
+
+        if (!codigo.getCodigo().equals(authCode)) {
+            throw new IllegalArgumentException("El código de autenticación es incorrecto");
+        }
+
+        if (codigo.isExpirado()) {
+            codigo.setUsado(true);
+            codigoRecuperacionRepository.save(codigo);
+            throw new IllegalArgumentException("El código de autenticación ha expirado. Solicita uno nuevo");
+        }
+
+        codigo.setUsado(true);
+        codigoRecuperacionRepository.save(codigo);
+    }
+
+    // ================== REGISTRO ==================
+    public ApiResponse<UsuarioResponse> registro(RegistroRequest request) {
+        String verificationCode = normalizarCodigo(request.getVerificationCode());
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
+
+        if (verificationCode == null) {
+            return iniciarRegistroConVerificacion(request, usuarioOpt);
+        }
+
+        return confirmarRegistroConCodigo(request, usuarioOpt, verificationCode);
     }
 
     private ApiResponse<UsuarioResponse> iniciarRegistroConVerificacion(RegistroRequest request, Optional<Usuario> usuarioOpt) {
@@ -164,11 +137,11 @@ public class AuthService {
             usuario = usuarioOpt.get();
 
             if (usuario.isEmailVerificado()) {
-                return new ApiResponse<>(false, "El email ya esta registrado");
+                throw new IllegalArgumentException("El email ya está registrado");
             }
 
             if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
-                return new ApiResponse<>(false, "Ya existe un registro pendiente para este email. Verifica tu email con la misma contrasena usada al registrarte");
+                throw new IllegalArgumentException("Ya existe un registro pendiente para este email. Verifica tu email con la misma contraseña usada al registrarte");
             }
         } else {
             usuario = new Usuario(
@@ -188,58 +161,50 @@ public class AuthService {
         codigoRecuperacionRepository.save(codigoVerificacion);
 
         EmailDto emailDto = new EmailDto(
-                "Verificacion de email - RecetasApp",
+                "Verificación de email - RecetasApp",
                 "Hola " + usuario.getNombre() + ",\n\n"
-                        + "Para completar tu registro, usa este codigo de verificacion:\n\n"
-                        + "Codigo de verificacion: " + codigo + "\n\n"
-                        + "Este codigo es valido por " + MINUTOS_EXPIRACION + " minutos.\n\n"
+                        + "Para completar tu registro, usa este código de verificación:\n\n"
+                        + "Código de verificación: " + codigo + "\n\n"
+                        + "Este código es válido por " + MINUTOS_EXPIRACION + " minutos.\n\n"
                         + "Si no solicitaste este registro, ignora este mensaje.",
                 usuario.getEmail()
         );
 
         try {
             emailService.sendMail(emailDto);
-        } catch (Exception emailError) {
+        } catch (Exception e) {
             codigoVerificacion.setUsado(true);
             codigoRecuperacionRepository.save(codigoVerificacion);
-            return new ApiResponse<>(false, "No se pudo enviar el codigo de verificacion: " + extraerMensajeEmail(emailError));
+            throw new RuntimeException("No se pudo enviar el código de verificación: " + extraerMensajeEmail(e));
         }
 
-        return new ApiResponse<>(true, "Te enviamos un codigo de verificacion al email. Envia nuevamente el registro con verificationCode para activar la cuenta");
+        return new ApiResponse<>(true, "Te enviamos un código de verificación al email. Envía nuevamente el registro con verificationCode para activar la cuenta");
     }
 
     private ApiResponse<UsuarioResponse> confirmarRegistroConCodigo(RegistroRequest request, Optional<Usuario> usuarioOpt, String verificationCode) {
-        if (usuarioOpt.isEmpty()) {
-            return new ApiResponse<>(false, "No existe un registro pendiente para este email. Solicita primero el codigo de verificacion");
-        }
-
-        Usuario usuario = usuarioOpt.get();
+        Usuario usuario = usuarioOpt
+                .orElseThrow(() -> new IllegalArgumentException("No existe un registro pendiente para este email. Solicita primero el código de verificación"));
 
         if (usuario.isEmailVerificado()) {
-            return new ApiResponse<>(false, "El email ya esta verificado. Puedes iniciar sesion");
+            throw new IllegalArgumentException("El email ya está verificado. Puedes iniciar sesión");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
-            return new ApiResponse<>(false, "Credenciales incorrectas");
+            throw new IllegalArgumentException("Credenciales incorrectas");
         }
 
-        Optional<Codigo> codigoOpt = codigoRecuperacionRepository
-                .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.VERIFICACION_EMAIL);
-
-        if (codigoOpt.isEmpty()) {
-            return new ApiResponse<>(false, "No hay un codigo de verificacion activo. Solicita uno nuevo");
-        }
-
-        Codigo codigo = codigoOpt.get();
+        Codigo codigo = codigoRecuperacionRepository
+                .findTopByUsuarioAndUsadoFalseAndTipoOrderByFechaCreacionDesc(usuario, TipoCodigo.VERIFICACION_EMAIL)
+                .orElseThrow(() -> new IllegalArgumentException("No hay un código de verificación activo. Solicita uno nuevo"));
 
         if (!verificationCode.equals(codigo.getCodigo())) {
-            return new ApiResponse<>(false, "El codigo de verificacion es incorrecto");
+            throw new IllegalArgumentException("El código de verificación es incorrecto");
         }
 
         if (codigo.isExpirado()) {
             codigo.setUsado(true);
             codigoRecuperacionRepository.save(codigo);
-            return new ApiResponse<>(false, "El codigo de verificacion ha expirado. Solicita uno nuevo");
+            throw new IllegalArgumentException("El código de verificación ha expirado. Solicita uno nuevo");
         }
 
         codigo.setUsado(true);
@@ -249,53 +214,21 @@ public class AuthService {
         usuario.setUltimoAcceso(LocalDateTime.now());
         usuarioRepository.save(usuario);
 
-        String token = jwtUtil.generateToken(usuario.getId(), usuario.getEmail());
-
-        UsuarioResponse usuarioResponse = new UsuarioResponse(
-                usuario.getId(),
-                usuario.getNombre(),
-                usuario.getEmail(),
-                usuario.getFotoPerfil(),
-                token
-        );
-        usuarioResponse.setEmailVerificado(usuario.isEmailVerificado());
-
-        return new ApiResponse<>(true, "Email verificado y registro completado exitosamente", usuarioResponse);
+        return new ApiResponse<>(true, "Email verificado y registro completado exitosamente", buildUsuarioResponse(usuario));
     }
 
-    private void invalidarCodigosPorTipo(Usuario usuario, TipoCodigo tipoCodigo) {
-        List<Codigo> codigosAnteriores = codigoRecuperacionRepository.findByUsuarioAndUsadoFalse(usuario);
-        for (Codigo codigoAnterior : codigosAnteriores) {
-            if (tipoCodigo.equals(codigoAnterior.getTipo())) {
-                codigoAnterior.setUsado(true);
-            }
-        }
-        codigoRecuperacionRepository.saveAll(codigosAnteriores);
-    }
-
-    private String normalizarCodigo(String code) {
-        if (code == null) {
-            return null;
-        }
-        String normalized = code.trim();
-        return normalized.isEmpty() ? null : normalized;
-    }
-
+    // ================== USUARIO AUTENTICADO ==================
     public ApiResponse<UsuarioResponse> getUsuarioAutenticado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            return new ApiResponse<>(false, "No hay una sesión activa");
+            throw new IllegalArgumentException("No hay una sesión activa");
         }
 
         String email = (String) authentication.getPrincipal();
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        if (usuarioOpt.isEmpty()) {
-            return new ApiResponse<>(false, "Usuario no encontrado");
-        }
-
-        Usuario usuario = usuarioOpt.get();
         UsuarioResponse usuarioResponse = new UsuarioResponse(
                 usuario.getId(),
                 usuario.getNombre(),
@@ -308,11 +241,38 @@ public class AuthService {
         return new ApiResponse<>(true, "Usuario obtenido exitosamente", usuarioResponse);
     }
 
+    // ================== HELPERS ==================
+    private UsuarioResponse buildUsuarioResponse(Usuario usuario) {
+        String token = jwtUtil.generateToken(usuario.getId(), usuario.getEmail());
+        UsuarioResponse response = new UsuarioResponse(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getEmail(),
+                usuario.getFotoPerfil(),
+                token
+        );
+        response.setEmailVerificado(usuario.isEmailVerificado());
+        return response;
+    }
+
+    private void invalidarCodigosPorTipo(Usuario usuario, TipoCodigo tipoCodigo) {
+        List<Codigo> codigos = codigoRecuperacionRepository.findByUsuarioAndUsadoFalse(usuario);
+        codigos.stream()
+                .filter(c -> tipoCodigo.equals(c.getTipo()))
+                .forEach(c -> c.setUsado(true));
+        codigoRecuperacionRepository.saveAll(codigos);
+    }
+
+    private String normalizarCodigo(String code) {
+        if (code == null) return null;
+        String normalized = code.trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
     private String extraerMensajeEmail(Exception exception) {
         if (exception.getMessage() == null || exception.getMessage().isBlank()) {
-            return "Revisa la configuracion SMTP del servidor";
+            return "Revisa la configuración SMTP del servidor";
         }
         return exception.getMessage();
     }
 }
-

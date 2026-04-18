@@ -57,31 +57,25 @@ public class ComentarioController {
             @RequestBody Map<String, Object> payload) {
 
         try {
+            // ✅ Validar primero, castear después
+            if (payload.get("usuarioId") == null || payload.get("texto") == null || payload.get("calificacion") == null) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "Datos incompletos"));
+            }
+
             Long usuarioId = ((Number) payload.get("usuarioId")).longValue();
             String texto = (String) payload.get("texto");
             Integer calificacion = (Integer) payload.get("calificacion");
 
-            if (usuarioId == null || texto == null || calificacion == null) {
-                return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Datos incompletos"));
-            }
-
-            // Evitar duplicados: un usuario solo puede comentar una vez por receta
             if (comentarioRepository.existsByRecetaIdAndUsuarioId(recetaId, usuarioId)) {
-                return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Ya has comentado esta receta"));
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "Ya has comentado esta receta"));
             }
 
-            // Obtener nombre del usuario
             Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
             String nombreUsuario = usuarioOpt.map(Usuario::getNombre).orElse("Usuario");
 
-            Comentario nuevoComentario = new Comentario(
-                    recetaId,
-                    usuarioId,
-                    texto,
-                    calificacion,
-                    nombreUsuario
-            );
-
+            Comentario nuevoComentario = new Comentario(recetaId, usuarioId, texto, calificacion, nombreUsuario);
             nuevoComentario.setFechaCreacion(LocalDateTime.now());
             Comentario guardado = comentarioRepository.save(nuevoComentario);
 
