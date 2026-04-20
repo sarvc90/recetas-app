@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Acceso restringido a receta exclusiva en El Rincón de los Sabores."
+    />
+    <title>El Rincón de los Sabores - Acceso Restringido</title>
+    <link rel="stylesheet" href="styles-planes.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
+      <div class="acceso-denegado-container">
+        <div class="acceso-denegado-card" role="region" aria-labelledby="acceso-denegado-title">
+          <span class="acceso-denegado-icon" aria-hidden="true">🔒</span>
+          <h1 id="acceso-denegado-title" class="acceso-denegado-title">Receta exclusiva</h1>
+          <p class="acceso-denegado-message">
+            Esta receta es parte de un plan de suscripción. Para acceder a su
+            contenido completo, necesitas una suscripción activa.
+          </p>
+          <div class="acceso-denegado-actions">
+            <button
+              type="button"
+              onclick="history.back()"
+              class="cancel-btn"
+              aria-label="Volver a la página anterior"
+            >
+              ⬅ Volver
+            </button>
+            <a
+              href="planes.html"
+              class="primary-btn"
+              style="
+                display: inline-block;
+                background: #53b6ae;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 15px;
+                transition: background 0.2s;
+              "
+              aria-label="Ver planes de suscripción disponibles"
+            >
+              🔍 Ver planes disponibles
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="config/env-loader.js" data-main="acceso-denegado.js" defer></script>
+  </body>
+</html>

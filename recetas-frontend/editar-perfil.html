@@ -88,7 +88,6 @@
             <button
               type="button"
               id="solicitar-verificacion-btn"
-              onclick="solicitarVerificacionEmail()"
               style="
                 margin-top: 8px;
                 padding: 10px 20px;
@@ -115,7 +114,7 @@
             </div>
             <button
               type="button"
-              onclick="confirmarVerificacionEmail()"
+              id="confirmar-verificacion-btn"
               style="
                 width: auto;
                 padding: 10px 20px;
@@ -127,7 +126,7 @@
             </button>
             <button
               type="button"
-              onclick="cancelarVerificacionEmail()"
+              id="cancelar-verificacion-btn"
               style="
                 width: auto;
                 padding: 10px 20px;
@@ -144,8 +143,8 @@
             <button type="submit" class="submit-btn">Guardar cambios</button>
             <button
               type="button"
+              id="cancelar-editar-btn"
               class="cancel-btn"
-              onclick="window.history.back()"
             >
               Cancelar
             </button>

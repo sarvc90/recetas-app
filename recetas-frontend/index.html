@@ -46,7 +46,7 @@
             placeholder="Mínimo 6 caracteres"
           />
         </div>
-        <button id="registro-btn" type="button" onclick="registrarUsuario()">
+        <button id="registro-btn" type="button">
           Crear Cuenta
         </button>
         <div
@@ -67,16 +67,13 @@
               autocomplete="one-time-code"
             />
           </div>
-          <button type="button" onclick="verificarRegistroCode()">
+          <button type="button" id="verificar-registro-btn">
             Verificar y completar registro
           </button>
           <div class="secondary-action">
             <a
               href="#"
-              onclick="
-                cancelarRegistro();
-                return false;
-              "
+              id="cancelar-registro-link"
               >← Volver / Reenviar código</a
             >
           </div>
@@ -98,7 +95,7 @@
             placeholder="Tu contraseña"
           />
         </div>
-        <button id="login-btn" type="button" onclick="loginUsuario()">
+        <button id="login-btn" type="button">
           Ingresar
         </button>
         <div
@@ -119,16 +116,13 @@
               autocomplete="one-time-code"
             />
           </div>
-          <button type="button" onclick="verificarAuthCode()">
+          <button type="button" id="verificar-auth-btn">
             Verificar código
           </button>
           <div class="secondary-action">
             <a
               href="#"
-              onclick="
-                cancelarLogin();
-                return false;
-              "
+              id="cancelar-login-link"
               >← Volver / Reenviar código</a
             >
           </div>

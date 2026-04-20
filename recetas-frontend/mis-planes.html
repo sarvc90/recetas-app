@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Gestiona tus planes de suscripción en El Rincón de los Sabores."
+    />
+    <meta property="og:title" content="El Rincón de los Sabores - Mis Planes" />
+    <meta
+      property="og:description"
+      content="Crea y administra tus planes de suscripción con recetas exclusivas."
+    />
+    <meta property="og:image" content="icon.png" />
+    <title>El Rincón de los Sabores - Mis Planes</title>
+    <link rel="stylesheet" href="styles-mis-planes.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
+      <h1>Mis Planes de Suscripción</h1>
+
+      <!-- Dashboard de métricas -->
+      <section class="dashboard-section" aria-labelledby="dashboard-title">
+        <h2 id="dashboard-title">Dashboard</h2>
+        <div id="dashboardLoading" class="hidden" role="status" aria-live="polite">
+          Cargando métricas...
+        </div>
+        <div id="dashboardError" class="result error hidden" role="alert"></div>
+        <div id="dashboardMetrics" class="metrics-grid" aria-live="polite"></div>
+        <div id="metricsTable" class="metrics-table-container hidden" aria-live="polite"></div>
+      </section>
+
+      <!-- Acciones -->
+      <div class="section-actions">
+        <button id="crearPlanBtn" class="primary-btn" type="button">
+          ➕ Crear plan
+        </button>
+      </div>
+
+      <!-- Estado general -->
+      <div
+        id="message"
+        class="result hidden"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
+
+      <!-- Lista de planes -->
+      <section class="content-section" aria-labelledby="mis-planes-title">
+        <h2 id="mis-planes-title">Mis planes creados</h2>
+        <div
+          id="loading"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Cargando tus planes...
+        </div>
+        <div id="misPlanesGrid" class="planes-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <!-- Modal crear plan -->
+    <div
+      id="crearPlanModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="crearPlanTitle"
+    >
+      <div class="modal-content">
+        <button class="close" type="button" aria-label="Cerrar" id="closeCrearPlanModal">
+          &times;
+        </button>
+        <h2 id="crearPlanTitle">Crear nuevo plan</h2>
+        <div id="crearPlanResult" class="result hidden" role="alert"></div>
+        <form id="crearPlanForm" novalidate>
+          <div class="form-group">
+            <label for="crearNombre">Nombre del plan:</label>
+            <input type="text" id="crearNombre" required placeholder="Ej: Plan Gourmet Premium" />
+          </div>
+          <div class="form-group">
+            <label for="crearDescripcion">Descripción:</label>
+            <textarea id="crearDescripcion" required placeholder="Describe qué incluye el plan..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="crearPrecio">Precio (USD):</label>
+            <input type="number" id="crearPrecio" required min="0" step="0.01" placeholder="9.99" />
+          </div>
+          <div class="form-group">
+            <label for="crearDuracion">Duración (días):</label>
+            <input type="number" id="crearDuracion" required min="1" step="1" placeholder="30" />
+          </div>
+          <div class="form-buttons">
+            <button type="submit" class="submit-btn">Crear Plan</button>
+            <button type="button" class="cancel-btn" id="cancelCrearPlanBtn">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal editar plan -->
+    <div
+      id="editarPlanModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="editarPlanTitle"
+    >
+      <div class="modal-content">
+        <button class="close" type="button" aria-label="Cerrar" id="closeEditarPlanModal">
+          &times;
+        </button>
+        <h2 id="editarPlanTitle">Editar plan</h2>
+        <div id="editarPlanResult" class="result hidden" role="alert"></div>
+        <form id="editarPlanForm" novalidate>
+          <input type="hidden" id="editarPlanId" />
+          <div class="form-group">
+            <label for="editarNombre">Nombre del plan:</label>
+            <input type="text" id="editarNombre" required />
+          </div>
+          <div class="form-group">
+            <label for="editarDescripcion">Descripción:</label>
+            <textarea id="editarDescripcion" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editarPrecio">Precio (USD):</label>
+            <input type="number" id="editarPrecio" required min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label for="editarDuracion">Duración (días):</label>
+            <input type="number" id="editarDuracion" required min="1" step="1" />
+          </div>
+          <div class="form-buttons">
+            <button type="submit" class="submit-btn">Guardar cambios</button>
+            <button type="button" class="cancel-btn" id="cancelEditarPlanBtn">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal gestionar recetas del plan -->
+    <div
+      id="gestionarRecetasModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="gestionarRecetasTitle"
+    >
+      <div class="modal-content modal-content-wide">
+        <button class="close" type="button" aria-label="Cerrar" id="closeGestionarRecetasModal">
+          &times;
+        </button>
+        <h2 id="gestionarRecetasTitle">Gestionar recetas del plan</h2>
+        <div id="gestionarRecetasResult" class="result hidden" role="alert"></div>
+
+        <div class="gestionar-sections">
+          <!-- Recetas actualmente en el plan -->
+          <div class="gestionar-subsection">
+            <h3>Recetas en el plan</h3>
+            <div id="recetasEnPlanLoading" class="hidden" role="status">Cargando...</div>
+            <div id="recetasEnPlanList" class="recetas-gestionar-list" aria-live="polite"></div>
+          </div>
+
+          <!-- Recetas disponibles para agregar -->
+          <div class="gestionar-subsection">
+            <h3>Mis recetas disponibles para agregar</h3>
+            <div id="recetasDisponiblesLoading" class="hidden" role="status">Cargando...</div>
+            <div id="recetasDisponiblesList" class="recetas-gestionar-list" aria-live="polite"></div>
+            <div id="asignarSeleccionadasContainer" class="hidden" style="margin-top: 12px;">
+              <button id="asignarSeleccionadasBtn" type="button" class="primary-btn">
+                Asignar recetas seleccionadas
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="config/env-loader.js" data-main="mis-planes.js" defer></script>
+  </body>
+</html>

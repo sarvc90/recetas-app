@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explora los planes de suscripción disponibles en El Rincón de los Sabores."
+    />
+    <meta property="og:title" content="El Rincón de los Sabores - Planes" />
+    <meta
+      property="og:description"
+      content="Descubre planes exclusivos con recetas premium de nuestros creadores."
+    />
+    <meta property="og:image" content="icon.png" />
+    <title>El Rincón de los Sabores - Planes</title>
+    <link rel="stylesheet" href="styles-planes.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <main id="main-content" class="container">
+      <h1>Planes de Suscripción</h1>
+
+      <div class="content-section">
+        <div id="creatorFilterBanner" class="creator-filter-banner hidden" aria-live="polite">
+          <span id="creatorFilterLabel"></span>
+          <button id="clearFilterBtn" type="button" class="clear-filter-btn">Ver todos los planes</button>
+        </div>
+
+        <section class="search-bar" aria-label="Buscar planes">
+          <label for="searchInput" class="sr-only">Buscar plan</label>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar planes por nombre..."
+          />
+          <button id="searchBtn" type="button">Buscar</button>
+        </section>
+
+        <div
+          id="loading"
+          class="hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Cargando planes...
+        </div>
+
+        <div
+          id="message"
+          class="result hidden"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+
+        <div id="planesGrid" class="grid" aria-live="polite" aria-label="Lista de planes"></div>
+
+        <div class="pagination">
+          <button id="loadMore" class="hidden" type="button">Cargar más</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal detalle de plan -->
+    <div
+      id="planDetailModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="planDetailTitle"
+    >
+      <div class="modal-content">
+        <button
+          id="closePlanDetailModal"
+          class="close"
+          type="button"
+          aria-label="Cerrar detalle de plan"
+        >
+          &times;
+        </button>
+        <h2 id="planDetailTitle"></h2>
+        <div id="planDetailBody"></div>
+      </div>
+    </div>
+
+    <!-- Página de acceso denegado (componente inline) -->
+    <script src="config/env-loader.js" data-main="planes.js" defer></script>
+  </body>
+</html>

@@ -337,6 +337,20 @@ async function verificarRegistroCode() {
 
 // ─── Soporte tecla Enter ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
+  // Botones (reemplaza onclicks inline eliminados del HTML)
+  document.getElementById('registro-btn').addEventListener('click', registrarUsuario);
+  document.getElementById('verificar-registro-btn').addEventListener('click', verificarRegistroCode);
+  document.getElementById('cancelar-registro-link').addEventListener('click', function (e) {
+    e.preventDefault();
+    cancelarRegistro();
+  });
+  document.getElementById('login-btn').addEventListener('click', loginUsuario);
+  document.getElementById('verificar-auth-btn').addEventListener('click', verificarAuthCode);
+  document.getElementById('cancelar-login-link').addEventListener('click', function (e) {
+    e.preventDefault();
+    cancelarLogin();
+  });
+
   document
     .getElementById('password')
     .addEventListener('keypress', function (e) {

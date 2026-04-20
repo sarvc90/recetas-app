@@ -168,6 +168,11 @@ function volverAPaso1() {
 
 // Enter key support
 document.addEventListener('DOMContentLoaded', function () {
+  // Botones (reemplaza onclicks inline eliminados del HTML)
+  document.getElementById('solicitar-codigo-btn').addEventListener('click', solicitarCodigo);
+  document.getElementById('reset-password-btn').addEventListener('click', resetPassword);
+  document.getElementById('volver-paso1-btn').addEventListener('click', volverAPaso1);
+
   document.getElementById('email').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
       solicitarCodigo();

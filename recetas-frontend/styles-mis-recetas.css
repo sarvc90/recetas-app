@@ -58,6 +58,106 @@ h1 {
   border: 0;
 }
 
+/* ================== HEADER ================== */
+
+.header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #ede9ef;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #53b6ae;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.user-photo:hover {
+  transform: scale(1.08);
+}
+
+.user-photo-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #85a4e8 0%, #53b6ae 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #53b6ae;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+
+.user-photo-placeholder:hover {
+  transform: scale(1.08);
+}
+
+.user-name {
+  color: #53b6ae;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: #53b6ae;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.nav-btn:hover {
+  background: #439d96;
+}
+
+.logout-btn {
+  background: #e74c3c;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+}
+
+/* ================== HEADER ACTIONS (legacy) ================== */
+
 .header-actions {
   text-align: right;
   margin-bottom: 20px;
@@ -351,5 +451,30 @@ h1 {
 
   .card-actions {
     flex-direction: column;
+  }
+
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-profile {
+    gap: 8px;
+  }
+
+  .user-photo,
+  .user-photo-placeholder {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+  }
+
+  .user-name {
+    font-size: 1rem;
+  }
+
+  .nav-buttons {
+    width: 100%;
+    justify-content: center;
   }
 }

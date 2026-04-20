@@ -1,0 +1,355 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Playfair Display', serif;
+}
+
+body {
+  background: linear-gradient(135deg, #85a4e8 0%, #53b6ae 100%);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ================== SKIP LINK ================== */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 20px;
+  background: #243340;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 20px;
+}
+
+/* ================== LAYOUT ================== */
+
+.pago-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.pago-container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+}
+
+/* ================== HEADER ================== */
+
+.pago-header {
+  background: linear-gradient(135deg, #85a4e8 0%, #53b6ae 100%);
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pago-logo {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
+
+.pago-header h1 {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 0;
+}
+
+/* ================== PLAN SUMMARY ================== */
+
+.plan-summary {
+  padding: 24px 32px;
+  background: #f8fffe;
+  border-bottom: 2px solid #e3eef3;
+}
+
+.loading-state {
+  text-align: center;
+  color: #53b6ae;
+  font-weight: bold;
+  padding: 16px 0;
+}
+
+.plan-summary-title {
+  color: #333;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.plan-summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.plan-summary-description {
+  align-items: flex-start;
+}
+
+.plan-summary-label {
+  font-size: 0.85rem;
+  color: #888;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.plan-summary-value {
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.plan-summary-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #53b6ae;
+}
+
+/* ================== PAYMENT SECTION ================== */
+
+.payment-section {
+  padding: 28px 32px;
+}
+
+.payment-section h2 {
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+/* ================== FORM ================== */
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+/* Stripe card element container */
+.card-element-container {
+  border: 2px solid #b5c6d5;
+  border-radius: 8px;
+  padding: 14px 12px;
+  background: white;
+  transition: border-color 0.3s;
+}
+
+.card-element-container.StripeElement--focus {
+  border-color: #53b6ae;
+  box-shadow: 0 0 0 3px rgba(83, 182, 174, 0.2);
+}
+
+.card-element-container.StripeElement--invalid {
+  border-color: #e74c3c;
+}
+
+.card-errors {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 8px;
+  min-height: 20px;
+}
+
+/* ================== BUTTONS ================== */
+
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+button {
+  font-family: 'Playfair Display', serif;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.submit-payment-btn {
+  flex: 1;
+  background: #53b6ae;
+  color: white;
+  padding: 14px 20px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.submit-payment-btn:hover:not(:disabled) {
+  background: #439d96;
+  transform: translateY(-2px);
+}
+
+.submit-payment-btn:disabled {
+  background: #b5c6d5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-payment-btn.processing {
+  background: #85a4e8;
+  cursor: not-allowed;
+}
+
+.cancel-link {
+  color: #e74c3c;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 8px 4px;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.cancel-link:hover {
+  color: #c0392b;
+}
+
+/* ================== STATUS MESSAGES ================== */
+
+.hidden {
+  display: none;
+}
+
+.result {
+  margin: 12px 0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.success {
+  color: #0f5132;
+  background: #d1e7dd;
+  border: 1px solid #badbcc;
+}
+
+.error {
+  color: #842029;
+  background: #f8d7da;
+  border: 1px solid #f5c2c7;
+}
+
+.loading {
+  color: #419cbd;
+  background: #cfe2ff;
+  border: 1px solid #b6d4fe;
+}
+
+/* ================== SUCCESS SECTION ================== */
+
+.success-section {
+  padding: 48px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.success-icon {
+  font-size: 4rem;
+  display: block;
+}
+
+.success-section h2 {
+  color: #0f5132;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.success-section p {
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.redirect-notice {
+  color: #888;
+  font-size: 0.88rem;
+}
+
+/* ================== RESPONSIVE ================== */
+
+@media (max-width: 600px) {
+  body {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .pago-wrapper {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .pago-container {
+    border-radius: 0;
+    min-height: 100vh;
+    max-width: 100%;
+  }
+
+  .pago-header {
+    padding: 20px;
+  }
+
+  .pago-header h1 {
+    font-size: 1.1rem;
+  }
+
+  .plan-summary,
+  .payment-section {
+    padding: 20px;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cancel-link {
+    text-align: center;
+    padding: 12px;
+  }
+}

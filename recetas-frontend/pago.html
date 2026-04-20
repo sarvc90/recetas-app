@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Suscríbete a un plan exclusivo en El Rincón de los Sabores."
+    />
+    <title>El Rincón de los Sabores - Pago</title>
+    <link rel="stylesheet" href="styles-pago.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+    <div class="pago-wrapper">
+      <main id="main-content" class="pago-container">
+        <div class="pago-header">
+          <img src="icon.png" alt="El Rincón de los Sabores" class="pago-logo" width="48" height="48" />
+          <h1>El Rincón de los Sabores</h1>
+        </div>
+
+        <section class="plan-summary" aria-labelledby="plan-summary-title">
+          <div id="planLoading" class="loading-state" role="status" aria-live="polite">
+            Cargando información del plan...
+          </div>
+          <div id="planError" class="result error hidden" role="alert"></div>
+          <div id="planInfo" class="hidden" aria-labelledby="plan-summary-title">
+            <h2 id="plan-summary-title" class="plan-summary-title">Resumen del plan</h2>
+            <div class="plan-summary-grid">
+              <div class="plan-summary-item">
+                <span class="plan-summary-label">Plan:</span>
+                <span id="planNombre" class="plan-summary-value"></span>
+              </div>
+              <div class="plan-summary-item">
+                <span class="plan-summary-label">Precio:</span>
+                <span id="planPrecio" class="plan-summary-value plan-summary-price"></span>
+              </div>
+              <div class="plan-summary-item">
+                <span class="plan-summary-label">Duración:</span>
+                <span id="planDuracion" class="plan-summary-value"></span>
+              </div>
+              <div class="plan-summary-item plan-summary-description">
+                <span class="plan-summary-label">Descripción:</span>
+                <span id="planDescripcion" class="plan-summary-value"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="payment-section" aria-labelledby="payment-title">
+          <h2 id="payment-title">Datos de pago</h2>
+
+          <div id="paymentResult" class="result hidden" role="alert" aria-live="assertive"></div>
+
+          <form id="paymentForm" novalidate>
+            <div class="form-group">
+              <label for="card-element">Tarjeta de crédito o débito</label>
+              <div id="card-element" class="card-element-container" aria-label="Formulario de tarjeta de crédito">
+                <!-- Stripe mounts here -->
+              </div>
+              <div id="card-errors" class="card-errors" role="alert" aria-live="assertive"></div>
+            </div>
+
+            <div class="form-buttons">
+              <button type="submit" id="submitPaymentBtn" class="submit-payment-btn" disabled>
+                💳 Pagar y suscribirse
+              </button>
+              <a href="planes.html" class="cancel-link">Cancelar</a>
+            </div>
+          </form>
+        </section>
+
+        <div id="successSection" class="success-section hidden" role="status" aria-live="polite">
+          <span class="success-icon" aria-hidden="true">✅</span>
+          <h2>¡Suscripción exitosa!</h2>
+          <p id="successMessage"></p>
+          <p class="redirect-notice">Serás redirigido a tus suscripciones en unos segundos...</p>
+        </div>
+      </main>
+    </div>
+
+    <script src="config/env-loader.js" data-main="pago.js" defer></script>
+  </body>
+</html>

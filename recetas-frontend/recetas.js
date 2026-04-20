@@ -431,6 +431,14 @@ function renderRecetas(recetas) {
     descripcion.textContent = receta.descripcion || 'Sin descripción';
 
     card.append(imagen, titulo, descripcion);
+
+    if (receta.esExclusiva === true) {
+      const badge = document.createElement('span');
+      badge.className = 'exclusive-badge';
+      badge.textContent = '🔒 Exclusiva';
+      card.appendChild(badge);
+    }
+
     card.addEventListener('click', () => openModal(receta));
     card.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -443,7 +451,33 @@ function renderRecetas(recetas) {
 }
 
 // ================== MODAL ==================
-function openModal(receta) {
+async function openModal(receta) {
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+  if (receta.esExclusiva === true && usuario && receta.usuarioId !== usuario.id) {
+    try {
+      const token = localStorage.getItem('token');
+      const accesoResponse = await fetch(
+        `${API_BASE_URL}/suscripciones/acceso/receta/${receta.id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const accesoData = await accesoResponse.json();
+      if (!accesoData.data) {
+        window.location.href = `acceso-denegado.html?recetaId=${receta.id}`;
+        return;
+      }
+    } catch (error) {
+      console.error('Error al verificar acceso a receta exclusiva:', error);
+      window.location.href = `acceso-denegado.html?recetaId=${receta.id}`;
+      return;
+    }
+  }
+
   modalTitle.textContent = receta.nombre || 'Receta sin nombre';
   modalDescription.textContent = receta.descripcion || 'Sin descripción';
   modalImage.src =
@@ -677,6 +711,9 @@ async function initApp() {
       { href: 'mis-recetas.html', label: 'Mis Recetas' },
       { href: 'favoritos.html', label: '❤️ Favoritos' },
       { href: 'editar-perfil.html', label: '✏️ Editar perfil' },
+      { href: 'planes.html', label: '🍽️ Planes' },
+      { href: 'mis-planes.html', label: '📋 Mis Planes' },
+      { href: 'mis-suscripciones.html', label: '📜 Mis Suscripciones' },
     ].forEach(({ href, label }) => {
       const link = document.createElement('a');
       link.href = href;

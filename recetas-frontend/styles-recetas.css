@@ -122,6 +122,17 @@ h1 {
   color: #555;
 }
 
+.exclusive-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #85a4e8, #53b6ae);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin: 0 10px 10px 10px;
+}
+
 /* Botón cargar más */
 .pagination {
   text-align: center;

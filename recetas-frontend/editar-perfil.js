@@ -43,8 +43,25 @@ async function initApp() {
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
+  document.addEventListener('DOMContentLoaded', bindButtons);
 } else {
   initApp();
+  bindButtons();
+}
+
+function bindButtons() {
+  document
+    .getElementById('solicitar-verificacion-btn')
+    .addEventListener('click', solicitarVerificacionEmail);
+  document
+    .getElementById('confirmar-verificacion-btn')
+    .addEventListener('click', confirmarVerificacionEmail);
+  document
+    .getElementById('cancelar-verificacion-btn')
+    .addEventListener('click', cancelarVerificacionEmail);
+  document
+    .getElementById('cancelar-editar-btn')
+    .addEventListener('click', () => window.history.back());
 }
 
 async function cargarDatosUsuario() {
