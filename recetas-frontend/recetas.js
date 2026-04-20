@@ -503,7 +503,6 @@ async function openModal(receta) {
   recetaActual = receta;
   currentRecetaId = receta.id;
 
-  const usuario = JSON.parse(localStorage.getItem('usuario'));
   if (usuario) {
     verificarFavorito(usuario.id, receta.id);
     verificarSiYaComento(receta.id, usuario.id);
