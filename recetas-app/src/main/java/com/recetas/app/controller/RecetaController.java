@@ -1,15 +1,19 @@
 package com.recetas.app.controller;
 
+import com.recetas.app.config.JwtUtil;
 import com.recetas.app.dto.ApiResponse;
 import com.recetas.app.entity.Receta;
 import com.recetas.app.entity.Usuario;
 import com.recetas.app.repository.RecetaRepository;
 import com.recetas.app.repository.UsuarioRepository;
 import com.recetas.app.service.ImageService;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.*;
-
-import com.recetas.app.config.JwtUtil;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/recetas")
@@ -36,22 +39,23 @@ public class RecetaController {
   @Autowired
   private UsuarioRepository usuarioRepository;
 
- /* // ✅ Obtener todas las recetas (paginadas)
+  /* // ✅ Obtener todas las recetas (paginadas)
   @GetMapping
   public Page<Receta> getAllRecetas(Pageable pageable) {
     return recetaRepository.findAll(pageable);
   }*/
- @GetMapping
- public ResponseEntity<Map<String, Object>> getAllRecetas(Pageable pageable) {
-     Page<Receta> page = recetaRepository.findAll(pageable);
-     Map<String, Object> response = new LinkedHashMap<>();
-     response.put("content", new ArrayList<>(page.getContent()));
-     response.put("totalElements", page.getTotalElements());
-     response.put("totalPages", page.getTotalPages());
-     response.put("number", page.getNumber());
-     response.put("size", page.getSize());
-     return ResponseEntity.ok(response);
- }
+  @GetMapping
+  public ResponseEntity<Map<String, Object>> getAllRecetas(Pageable pageable) {
+    Page<Receta> page = recetaRepository.findAll(pageable);
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("content", new ArrayList<>(page.getContent()));
+    response.put("totalElements", page.getTotalElements());
+    response.put("totalPages", page.getTotalPages());
+    response.put("number", page.getNumber());
+    response.put("size", page.getSize());
+    response.put("last", page.isLast());
+    return ResponseEntity.ok(response);
+  }
 
   // ✅ Crear nueva receta
   @PostMapping
@@ -89,19 +93,22 @@ public class RecetaController {
     @RequestBody Receta recetaActualizada,
     @RequestHeader("Authorization") String token
   ) {
+    Long usuarioId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
 
-      Long usuarioId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+    return recetaRepository
+      .findById(id)
+      .<ResponseEntity<?>>map(receta -> {
+        // 🔴 VALIDACIÓN DE SEGURIDAD
+        if (!receta.getUsuarioId().equals(usuarioId)) {
+          return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            new ApiResponse<>(
+              false,
+              "No tienes permiso para actualizar esta receta"
+            )
+          );
+        }
 
-      return recetaRepository.findById(id)
-              .<ResponseEntity<?>>map(receta -> {
-
-                  // 🔴 VALIDACIÓN DE SEGURIDAD
-                  if (!receta.getUsuarioId().equals(usuarioId)) {
-                      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                              .body(new ApiResponse<>(false, "No tienes permiso para actualizar esta receta"));
-                  }
-
-                  receta.setNombre(recetaActualizada.getNombre());
+        receta.setNombre(recetaActualizada.getNombre());
         receta.setDescripcion(recetaActualizada.getDescripcion());
         receta.setIngredientes(recetaActualizada.getIngredientes());
         receta.setInstrucciones(recetaActualizada.getInstrucciones());
@@ -121,28 +128,32 @@ public class RecetaController {
   // ✅ Eliminar receta
   @DeleteMapping("/{id}")
   public ResponseEntity<ApiResponse<Object>> eliminarReceta(
-          @PathVariable Long id,
-          @RequestHeader("Authorization") String token) {
+    @PathVariable Long id,
+    @RequestHeader("Authorization") String token
+  ) {
+    String jwt = token.replace("Bearer ", "");
+    String emailUsuario = jwtUtil.getEmailFromToken(jwt);
 
-      String jwt = token.replace("Bearer ", "");
-      String emailUsuario = jwtUtil.getEmailFromToken(jwt);
+    Usuario usuarioActual = usuarioRepository
+      .findByEmail(emailUsuario)
+      .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
 
-      Usuario usuarioActual = usuarioRepository.findByEmail(emailUsuario)
-              .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
+    Receta receta = recetaRepository
+      .findById(id)
+      .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
 
-      Receta receta = recetaRepository.findById(id)
-              .orElseThrow(() -> new NoSuchElementException("Receta no encontrada"));
-
-      // 🔐 Validación de seguridad
-      if (!receta.getUsuarioId().equals(usuarioActual.getId())) {
-          throw new SecurityException("No tienes permiso para eliminar esta receta");
-      }
-
-      recetaRepository.deleteById(id);
-
-      return ResponseEntity.ok(
-              new ApiResponse<>(true, "Receta eliminada correctamente", null)
+    // 🔐 Validación de seguridad
+    if (!receta.getUsuarioId().equals(usuarioActual.getId())) {
+      throw new SecurityException(
+        "No tienes permiso para eliminar esta receta"
       );
+    }
+
+    recetaRepository.deleteById(id);
+
+    return ResponseEntity.ok(
+      new ApiResponse<>(true, "Receta eliminada correctamente", null)
+    );
   }
 
   // ✅ Obtener recetas por usuario (todas)
