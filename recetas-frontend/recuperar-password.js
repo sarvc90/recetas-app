@@ -166,13 +166,14 @@ function volverAPaso1() {
   document.getElementById('resultado-email').className = 'result';
 }
 
-// Enter key support
-document.addEventListener('DOMContentLoaded', function () {
+// Inicialización de eventos
+function setupEventListeners() {
   // Botones (reemplaza onclicks inline eliminados del HTML)
   document.getElementById('solicitar-codigo-btn').addEventListener('click', solicitarCodigo);
   document.getElementById('reset-password-btn').addEventListener('click', resetPassword);
   document.getElementById('volver-paso1-btn').addEventListener('click', volverAPaso1);
 
+  // Soporte tecla Enter
   document.getElementById('email').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
       solicitarCodigo();
@@ -192,4 +193,10 @@ document.addEventListener('DOMContentLoaded', function () {
         resetPassword();
       }
     });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupEventListeners);
+} else {
+  setupEventListeners();
+}
