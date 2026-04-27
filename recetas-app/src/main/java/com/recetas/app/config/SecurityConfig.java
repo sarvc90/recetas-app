@@ -2,6 +2,7 @@
 package com.recetas.app.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,12 +15,18 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
     private JwtFilter jwtFilter;
+
+    @Value("${cors.allowed-origins:http://localhost}")
+    private String allowedOriginsRaw;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,6 +40,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/recetas").permitAll()
                         .requestMatchers("/api/recetas/buscar/**").permitAll()
                         .requestMatchers("/api/recetas/buscar").permitAll()
+                        .requestMatchers("/api/planes").permitAll()
+                        .requestMatchers("/api/planes/{planId}").permitAll()
+                        .requestMatchers("/api/planes/creador/**").permitAll()
+                        .requestMatchers("/api/config/**").permitAll()
+                        // Todo lo demás requiere token
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -42,9 +54,13 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        List<String> origins = Arrays.stream(allowedOriginsRaw.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:3000");
-        config.addAllowedOrigin("http://localhost");
+        config.setAllowedOrigins(origins);
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);

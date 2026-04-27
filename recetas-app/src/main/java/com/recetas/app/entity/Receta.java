@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
 @Table(name = "recetas")
@@ -45,6 +46,13 @@ public class Receta {
 
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
+
+    @Column(name = "es_exclusiva", nullable = false)
+    private boolean esExclusiva = false;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long planId;
 
     // Constructor vacío (requerido por JPA)
     public Receta() {
@@ -100,4 +108,10 @@ public class Receta {
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
     }
+
+    public boolean isEsExclusiva() { return esExclusiva; }
+    public void setEsExclusiva(boolean esExclusiva) { this.esExclusiva = esExclusiva; }
+
+    public Long getPlanId() { return planId; }
+    public void setPlanId(Long planId) { this.planId = planId; }
 }

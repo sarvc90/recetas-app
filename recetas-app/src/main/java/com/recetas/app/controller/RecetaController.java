@@ -3,7 +3,9 @@ package com.recetas.app.controller;
 import com.recetas.app.config.JwtUtil;
 import com.recetas.app.dto.ApiResponse;
 import com.recetas.app.entity.Receta;
+import com.recetas.app.entity.RecetaPlan;
 import com.recetas.app.entity.Usuario;
+import com.recetas.app.repository.RecetaPlanRepository;
 import com.recetas.app.repository.RecetaRepository;
 import com.recetas.app.repository.UsuarioRepository;
 import com.recetas.app.service.ImageService;
@@ -39,6 +41,9 @@ public class RecetaController {
   @Autowired
   private UsuarioRepository usuarioRepository;
 
+  @Autowired
+  private RecetaPlanRepository recetaPlanRepository;
+
   /* // ✅ Obtener todas las recetas (paginadas)
   @GetMapping
   public Page<Receta> getAllRecetas(Pageable pageable) {
@@ -47,8 +52,18 @@ public class RecetaController {
   @GetMapping
   public ResponseEntity<Map<String, Object>> getAllRecetas(Pageable pageable) {
     Page<Receta> page = recetaRepository.findAll(pageable);
+    List<Receta> content = new ArrayList<>(page.getContent());
+    // Enrich exclusive recipes with their planId
+    for (Receta receta : content) {
+      if (receta.isEsExclusiva()) {
+        List<RecetaPlan> planes = recetaPlanRepository.findByRecetaId(receta.getId());
+        if (!planes.isEmpty()) {
+          receta.setPlanId(planes.get(0).getPlanId());
+        }
+      }
+    }
     Map<String, Object> response = new LinkedHashMap<>();
-    response.put("content", new ArrayList<>(page.getContent()));
+    response.put("content", content);
     response.put("totalElements", page.getTotalElements());
     response.put("totalPages", page.getTotalPages());
     response.put("number", page.getNumber());

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
  *   carlos@email.com, maria@email.com, juan@email.com,
  *   ana@email.com, pedro@email.com
  */
-@Component
 @Profile("dev")
 public class DataInitializer implements CommandLineRunner {
 
