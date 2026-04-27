@@ -159,7 +159,8 @@ async function cargarDashboard(creadorId) {
 
     if (!response.ok) throw new Error('Error al cargar dashboard');
 
-    const data = await response.json();
+    const json = await response.json();
+    const data = json.data || json;
 
     renderDashboardMetrics(data);
     if (data.metricasPorPlan && data.metricasPorPlan.length > 0) {
@@ -177,8 +178,13 @@ function renderDashboardMetrics(data) {
   const metricas = [
     {
       icon: '💰',
-      label: 'Ingresos totales',
-      value: formatearPrecio(data.ingresosTotales || 0),
+      label: 'Tus ingresos (75%)',
+      value: formatearPrecio(data.ingresosCreador || 0),
+    },
+    {
+      icon: '🏦',
+      label: 'Comisión plataforma (25%)',
+      value: formatearPrecio(data.comisionPlataforma || 0),
     },
     {
       icon: '👥',
@@ -271,10 +277,11 @@ async function cargarMisPlanes(creadorId) {
 
     if (!response.ok) throw new Error('Error al cargar tus planes');
 
-    const planes = await response.json();
+    const json = await response.json();
+    const planes = Array.isArray(json) ? json : (json.data || []);
 
-    if (!planes || planes.length === 0) {
-      mostrarResultado(messageEl, 'Aún no has creado ningún plan. ¡Crea tu primer plan!', 'loading');
+    if (planes.length === 0) {
+      mostrarResultado(messageEl, 'Aún no has creado ningún plan. ¡Crea tu primer plan!', 'empty');
       return;
     }
 
@@ -369,9 +376,8 @@ crearPlanForm.addEventListener('submit', async (e) => {
   const nombre = document.getElementById('crearNombre').value.trim();
   const descripcion = document.getElementById('crearDescripcion').value.trim();
   const precio = parseFloat(document.getElementById('crearPrecio').value);
-  const duracionDias = parseInt(document.getElementById('crearDuracion').value, 10);
 
-  if (!nombre || !descripcion || isNaN(precio) || isNaN(duracionDias)) {
+  if (!nombre || !descripcion || isNaN(precio)) {
     mostrarResultado(crearPlanResult, 'Todos los campos son obligatorios.', 'error');
     return;
   }
@@ -383,7 +389,7 @@ crearPlanForm.addEventListener('submit', async (e) => {
     const response = await fetch(`${API_BASE_URL}/planes`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ nombre, descripcion, precio, duracionDias }),
+      body: JSON.stringify({ nombre, descripcion, precio }),
     });
 
     if (!response.ok) {
@@ -412,7 +418,6 @@ function abrirModalEditar(plan) {
   document.getElementById('editarNombre').value = plan.nombre || '';
   document.getElementById('editarDescripcion').value = plan.descripcion || '';
   document.getElementById('editarPrecio').value = plan.precio || '';
-  document.getElementById('editarDuracion').value = plan.duracionDias || '';
   ocultarResultado(editarPlanResult);
   editarPlanModal.classList.remove('hidden');
 }
@@ -428,9 +433,8 @@ editarPlanForm.addEventListener('submit', async (e) => {
   const nombre = document.getElementById('editarNombre').value.trim();
   const descripcion = document.getElementById('editarDescripcion').value.trim();
   const precio = parseFloat(document.getElementById('editarPrecio').value);
-  const duracionDias = parseInt(document.getElementById('editarDuracion').value, 10);
 
-  if (!nombre || !descripcion || isNaN(precio) || isNaN(duracionDias)) {
+  if (!nombre || !descripcion || isNaN(precio)) {
     mostrarResultado(editarPlanResult, 'Todos los campos son obligatorios.', 'error');
     return;
   }
@@ -442,7 +446,7 @@ editarPlanForm.addEventListener('submit', async (e) => {
     const response = await fetch(`${API_BASE_URL}/planes/${planId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ nombre, descripcion, precio, duracionDias }),
+      body: JSON.stringify({ nombre, descripcion, precio }),
     });
 
     if (!response.ok) {
@@ -521,9 +525,8 @@ async function cargarRecetasEnPlan(plan) {
 
   const recetaIds = Array.isArray(plan.recetaIds) ? plan.recetaIds : [];
 
-  recetasEnPlanLoading.classList.add('hidden');
-
   if (recetaIds.length === 0) {
+    recetasEnPlanLoading.classList.add('hidden');
     const empty = document.createElement('p');
     empty.className = 'recetas-gestionar-empty';
     empty.textContent = 'Este plan no tiene recetas asignadas.';
@@ -531,13 +534,31 @@ async function cargarRecetasEnPlan(plan) {
     return;
   }
 
+  // Fetch actual recipe names from the creator's recipe list
+  let nombrePorId = new Map();
+  try {
+    const recetasResponse = await fetch(
+      `${API_BASE_URL}/recetas/usuario/${plan.creadorId}`,
+    );
+    if (recetasResponse.ok) {
+      const recetas = await recetasResponse.json();
+      const lista = Array.isArray(recetas) ? recetas : (recetas.content || []);
+      lista.forEach((r) => nombrePorId.set(String(r.id), r.nombre));
+    }
+  } catch (err) {
+    console.warn('No se pudieron cargar los nombres de las recetas:', err);
+  }
+
+  recetasEnPlanLoading.classList.add('hidden');
+
   recetaIds.forEach((recetaId) => {
-    const item = crearItemRecetaEnPlan(plan.id, recetaId);
+    const nombre = nombrePorId.get(String(recetaId)) || null;
+    const item = crearItemRecetaEnPlan(plan.id, recetaId, nombre);
     recetasEnPlanList.appendChild(item);
   });
 }
 
-function crearItemRecetaEnPlan(planId, recetaId) {
+function crearItemRecetaEnPlan(planId, recetaId, nombre) {
   const item = document.createElement('div');
   item.className = 'receta-gestionar-item';
   item.dataset.recetaId = recetaId;
@@ -546,7 +567,7 @@ function crearItemRecetaEnPlan(planId, recetaId) {
   info.className = 'receta-gestionar-item-info';
   const nameEl = document.createElement('span');
   nameEl.className = 'receta-gestionar-item-name';
-  nameEl.textContent = `Receta #${recetaId}`;
+  nameEl.textContent = nombre || `Receta #${recetaId}`;
   info.appendChild(nameEl);
 
   const removeBtn = document.createElement('button');

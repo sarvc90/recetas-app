@@ -17,6 +17,14 @@ const recetasExclusivasLoading = document.getElementById('recetasExclusivasLoadi
 const recetasExclusivasError = document.getElementById('recetasExclusivasError');
 const recetasExclusivasList = document.getElementById('recetasExclusivasList');
 
+const recetaDetalleModal = document.getElementById('recetaDetalleModal');
+const closeRecetaDetalleModal = document.getElementById('closeRecetaDetalleModal');
+const recetaDetalleTitle = document.getElementById('recetaDetalleTitle');
+const recetaDetalleDesc = document.getElementById('recetaDetalleDesc');
+const recetaDetalleImg = document.getElementById('recetaDetalleImg');
+const recetaDetalleIngredientes = document.getElementById('recetaDetalleIngredientes');
+const recetaDetalleInstrucciones = document.getElementById('recetaDetalleInstrucciones');
+
 // ================== HELPERS ==================
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -59,7 +67,7 @@ function calcularTiempoRestante(fechaFin) {
 }
 
 function esSuscripcionActiva(s) {
-  return s.vigente === true || s.estado === 'ACTIVA';
+  return s.vigente === true;
 }
 
 // ================== HEADER ==================
@@ -108,6 +116,7 @@ function construirHeader(container, usuario) {
   navButtons.setAttribute('aria-label', 'Acciones de cuenta');
 
   [
+    { href: 'recetas.html', label: '⬅ Volver a recetas' },
     { href: 'mis-recetas.html', label: 'Mis Recetas' },
     { href: 'favoritos.html', label: '❤️ Favoritos' },
     { href: 'editar-perfil.html', label: '✏️ Editar perfil' },
@@ -369,7 +378,8 @@ async function abrirRecetasExclusivas(suscripcion) {
 
     if (!planResponse.ok) throw new Error('No se pudo cargar el plan');
 
-    const plan = await planResponse.json();
+    const planJson = await planResponse.json();
+    const plan = planJson.data || planJson;
     const recetaIds = Array.isArray(plan.recetaIds) ? plan.recetaIds : [];
     const creadorId = plan.creadorId;
 
@@ -442,10 +452,63 @@ function crearCardRecetaExclusiva(receta) {
   descEl.className = 'receta-exclusiva-desc';
   descEl.textContent = receta.descripcion || '';
 
-  body.append(nameEl, descEl);
+  const verBtn = document.createElement('button');
+  verBtn.className = 'ver-receta-detalle-btn';
+  verBtn.type = 'button';
+  verBtn.textContent = '👁 Ver receta';
+  verBtn.setAttribute('aria-label', `Ver detalle de ${receta.nombre || 'receta'}`);
+  verBtn.addEventListener('click', () => abrirDetalleReceta(receta));
+
+  body.append(nameEl, descEl, verBtn);
   card.append(img, body);
 
   return card;
+}
+
+async function abrirDetalleReceta(receta) {
+  try {
+    const accesoResponse = await fetch(
+      `${API_BASE_URL}/suscripciones/acceso/receta/${receta.id}`,
+      { headers: getAuthHeaders() },
+    );
+    const accesoData = await accesoResponse.json();
+
+    if (accesoData.data === false) {
+      recetasExclusivasError.textContent =
+        'Tu suscripción no está activa. No puedes ver esta receta.';
+      recetasExclusivasError.classList.remove('hidden');
+      return;
+    }
+
+    recetasExclusivasError.classList.add('hidden');
+    abrirModalDetalleReceta(receta);
+  } catch (error) {
+    console.error('Error al verificar acceso a receta:', error);
+    recetasExclusivasError.textContent = '❌ Error al verificar el acceso a la receta.';
+    recetasExclusivasError.classList.remove('hidden');
+  }
+}
+
+function abrirModalDetalleReceta(receta) {
+  recetaDetalleTitle.textContent = receta.nombre || 'Receta sin nombre';
+  recetaDetalleDesc.textContent = receta.descripcion || '';
+  recetaDetalleImg.src =
+    receta.imagenUrl || 'https://via.placeholder.com/500x300?text=Sin+Imagen';
+
+  recetaDetalleIngredientes.replaceChildren();
+  const ingredientesRaw = receta.ingredientes || '';
+  const ingredientes =
+    typeof ingredientesRaw === 'string'
+      ? ingredientesRaw.split('\n').filter((i) => i.trim() !== '')
+      : ingredientesRaw;
+  ingredientes.forEach((ing) => {
+    const li = document.createElement('li');
+    li.textContent = ing.trim();
+    recetaDetalleIngredientes.appendChild(li);
+  });
+
+  recetaDetalleInstrucciones.textContent = receta.instrucciones || 'Sin instrucciones';
+  recetaDetalleModal.classList.remove('hidden');
 }
 
 // ================== MODAL CLOSE ==================
@@ -459,9 +522,23 @@ recetasExclusivasModal.addEventListener('click', (e) => {
   }
 });
 
+closeRecetaDetalleModal?.addEventListener('click', () => {
+  recetaDetalleModal.classList.add('hidden');
+});
+
+recetaDetalleModal?.addEventListener('click', (e) => {
+  if (e.target === recetaDetalleModal) {
+    recetaDetalleModal.classList.add('hidden');
+  }
+});
+
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !recetasExclusivasModal.classList.contains('hidden')) {
-    recetasExclusivasModal.classList.add('hidden');
+  if (e.key === 'Escape') {
+    if (!recetaDetalleModal?.classList.contains('hidden')) {
+      recetaDetalleModal.classList.add('hidden');
+    } else if (!recetasExclusivasModal.classList.contains('hidden')) {
+      recetasExclusivasModal.classList.add('hidden');
+    }
   }
 });
 

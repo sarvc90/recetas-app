@@ -103,6 +103,41 @@
       </div>
     </div>
 
+    <!-- Modal detalle de receta exclusiva -->
+    <div
+      id="recetaDetalleModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="recetaDetalleTitle"
+    >
+      <div class="modal-content">
+        <button
+          id="closeRecetaDetalleModal"
+          class="close"
+          type="button"
+          aria-label="Cerrar"
+        >
+          &times;
+        </button>
+        <h2 id="recetaDetalleTitle">Detalle de la receta</h2>
+        <p id="recetaDetalleDesc"></p>
+        <img
+          id="recetaDetalleImg"
+          alt="Imagen receta"
+          width="500"
+          height="300"
+          loading="lazy"
+        />
+        <div class="modal-info">
+          <h3>Ingredientes</h3>
+          <ul id="recetaDetalleIngredientes"></ul>
+          <h3>Instrucciones</h3>
+          <p id="recetaDetalleInstrucciones"></p>
+        </div>
+      </div>
+    </div>
+
     <script src="config/env-loader.js" data-main="mis-suscripciones.js" defer></script>
   </body>
 </html>

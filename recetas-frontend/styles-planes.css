@@ -337,6 +337,7 @@ h1 {
 
 .plan-creator-link:hover {
   color: #53b6ae;
+  background: none;
   transform: none;
 }
 
@@ -440,7 +441,7 @@ button:hover {
 /* ================== STATUS MESSAGES ================== */
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .result {
@@ -575,6 +576,7 @@ button:hover {
 
 .plan-detail-creator-link:hover {
   color: #53b6ae;
+  background: none;
   transform: none;
 }
 

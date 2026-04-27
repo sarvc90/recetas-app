@@ -76,8 +76,8 @@ async function cargarPlanes() {
 
     if (!response.ok) throw new Error('Error al cargar planes');
 
-    const data = await response.json();
-    todosLosPlanes = Array.isArray(data) ? data : [];
+    const json = await response.json();
+    todosLosPlanes = Array.isArray(json) ? json : (json.data || []);
 
     aplicarFiltros();
   } catch (error) {
@@ -414,6 +414,7 @@ function construirHeader(container) {
   navButtons.setAttribute('aria-label', 'Acciones de cuenta');
 
   [
+    { href: 'recetas.html', label: '⬅ Volver a recetas' },
     { href: 'mis-recetas.html', label: 'Mis Recetas' },
     { href: 'favoritos.html', label: '❤️ Favoritos' },
     { href: 'editar-perfil.html', label: '✏️ Editar perfil' },

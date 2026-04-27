@@ -43,6 +43,10 @@ const favBtn = document.getElementById('favBtn');
 let esFavorito = false;
 let recetaActual = null;
 
+const esExclusivaCheckbox = document.getElementById('esExclusiva');
+const planSelectContainer = document.getElementById('planSelectContainer');
+const planSelect = document.getElementById('planSelect');
+
 const commentsList = document.getElementById('commentsList');
 const commentText = document.getElementById('commentText');
 const submitCommentBtn = document.getElementById('submitComment');
@@ -82,6 +86,12 @@ cancelRecipeBtn?.addEventListener('click', () => {
   recipeForm.classList.add('hidden');
   newRecipeForm.reset();
   imagePreview.replaceChildren();
+  if (esExclusivaCheckbox) esExclusivaCheckbox.checked = false;
+  planSelectContainer?.classList.add('hidden');
+});
+
+esExclusivaCheckbox?.addEventListener('change', () => {
+  planSelectContainer?.classList.toggle('hidden', !esExclusivaCheckbox.checked);
 });
 
 document.getElementById('searchBtn')?.addEventListener('click', buscarRecetas);
@@ -435,7 +445,8 @@ function renderRecetas(recetas) {
     if (receta.esExclusiva === true) {
       const badge = document.createElement('span');
       badge.className = 'exclusive-badge';
-      badge.textContent = '🔒 Exclusiva';
+      badge.textContent = '🔒 Exclusiva — Ver plan';
+      badge.title = 'Esta receta requiere suscripción. Haz clic para ver el plan.';
       card.appendChild(badge);
     }
 
@@ -454,7 +465,13 @@ function renderRecetas(recetas) {
 async function openModal(receta) {
   const usuario = JSON.parse(localStorage.getItem('usuario'));
 
-  if (receta.esExclusiva === true && usuario && receta.usuarioId !== usuario.id) {
+  if (receta.esExclusiva === true && (!usuario || receta.usuarioId !== usuario.id)) {
+    if (!usuario) {
+      // Not logged in — send to plan purchase page if planId known, else login
+      const dest = receta.planId ? `pago.html?planId=${receta.planId}` : 'index.html';
+      window.location.href = dest;
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
       const accesoResponse = await fetch(
@@ -468,12 +485,14 @@ async function openModal(receta) {
       );
       const accesoData = await accesoResponse.json();
       if (!accesoData.data) {
-        window.location.href = `acceso-denegado.html?recetaId=${receta.id}`;
+        const dest = receta.planId ? `pago.html?planId=${receta.planId}` : 'planes.html';
+        window.location.href = dest;
         return;
       }
     } catch (error) {
       console.error('Error al verificar acceso a receta exclusiva:', error);
-      window.location.href = `acceso-denegado.html?recetaId=${receta.id}`;
+      const dest = receta.planId ? `pago.html?planId=${receta.planId}` : 'planes.html';
+      window.location.href = dest;
       return;
     }
   }
@@ -578,11 +597,30 @@ newRecipeForm?.addEventListener('submit', async (e) => {
     if (!recetaResponse.ok) throw new Error('Error al crear la receta');
 
     const recetaActualizada = await recetaResponse.json();
+
+    // Assign to exclusive plan if requested
+    if (esExclusivaCheckbox?.checked && planSelect?.value) {
+      const planId = planSelect.value;
+      const asignarResponse = await fetch(
+        `${API_BASE_URL}/planes/${planId}/recetas`,
+        {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ recetaIds: [recetaActualizada.id] }),
+        },
+      );
+      if (!asignarResponse.ok) {
+        console.warn('Receta creada pero no se pudo asignar al plan');
+      }
+    }
+
     renderRecetas([recetaActualizada]);
 
     recipeForm.classList.add('hidden');
     newRecipeForm.reset();
     imagePreview.replaceChildren();
+    if (esExclusivaCheckbox) esExclusivaCheckbox.checked = false;
+    planSelectContainer?.classList.add('hidden');
 
     message.textContent = '✅ Receta creada correctamente';
     message.classList.remove('hidden');
@@ -647,6 +685,37 @@ async function buscarRecetas() {
     message.classList.remove('hidden');
   } finally {
     loading.classList.add('hidden');
+  }
+}
+
+// ================== CARGAR PLANES EN SELECTOR ==================
+async function cargarPlanesEnSelector(usuarioId) {
+  if (!planSelect) return;
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/planes/creador/${usuarioId}`,
+      { headers: getAuthHeaders() },
+    );
+    if (!response.ok) return;
+    const json = await response.json();
+    const planes = Array.isArray(json) ? json : (json.data || []);
+    const activos = planes.filter((p) => p.estado === 'ACTIVO');
+    planSelect.replaceChildren();
+    if (activos.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'Sin planes activos';
+      planSelect.appendChild(opt);
+      return;
+    }
+    activos.forEach((p) => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nombre;
+      planSelect.appendChild(opt);
+    });
+  } catch (err) {
+    console.warn('No se pudieron cargar los planes:', err);
   }
 }
 
@@ -739,7 +808,10 @@ async function initApp() {
     });
   }
 
-  await fetchRecetas();
+  await Promise.all([
+    fetchRecetas(),
+    cargarPlanesEnSelector(usuarioData.id),
+  ]);
 }
 
 if (document.readyState === 'loading') {

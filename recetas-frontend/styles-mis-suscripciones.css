@@ -374,7 +374,7 @@ button:hover {
 /* ================== STATUS MESSAGES ================== */
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .result {

@@ -2,9 +2,6 @@
 const API_BASE_URL =
   window.APP_CONFIG.API_BASE_URL || `${window.location.origin}/api`;
 
-const STRIPE_KEY =
-  window.STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder';
-
 // ================== DOM REFS ==================
 const planLoadingEl = document.getElementById('planLoading');
 const planErrorEl = document.getElementById('planError');
@@ -71,7 +68,8 @@ async function cargarPlan(planId) {
 
     if (!response.ok) throw new Error('No se encontró el plan');
 
-    const plan = await response.json();
+    const json = await response.json();
+    const plan = json.data || json;
 
     planNombreEl.textContent = plan.nombre || 'Plan sin nombre';
     planPrecioEl.textContent = formatearPrecio(plan.precio || 0);
@@ -91,50 +89,80 @@ async function cargarPlan(planId) {
   }
 }
 
+// ================== STRIPE KEY ==================
+async function cargarStripeKey() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/config/stripe`);
+    if (!response.ok) throw new Error('No se pudo obtener la configuración de pago');
+    const data = await response.json();
+    return data.publishableKey;
+  } catch (error) {
+    console.error('Error al cargar Stripe config:', error);
+    return null;
+  }
+}
+
 // ================== STRIPE SETUP ==================
-function inicializarStripe() {
-  const stripe = Stripe(STRIPE_KEY);
+function inicializarStripe(publishableKey) {
+  const stripe = Stripe(publishableKey);
   const elements = stripe.elements();
 
-  const cardElement = elements.create('card', {
-    style: {
-      base: {
-        fontFamily: '"Playfair Display", serif',
-        fontSize: '16px',
-        color: '#333',
-        '::placeholder': {
-          color: '#aab7c4',
-        },
-      },
-      invalid: {
-        color: '#e74c3c',
-        iconColor: '#e74c3c',
-      },
+  const elementStyle = {
+    base: {
+      fontFamily: '"Playfair Display", serif',
+      fontSize: '15px',
+      color: '#333',
+      '::placeholder': { color: '#aab7c4' },
     },
+    invalid: {
+      color: '#e74c3c',
+      iconColor: '#e74c3c',
+    },
+  };
+
+  const cardNumber = elements.create('cardNumber', { style: elementStyle });
+  const cardExpiry = elements.create('cardExpiry', { style: elementStyle });
+  const cardCvc   = elements.create('cardCvc',    { style: elementStyle });
+
+  cardNumber.mount('#card-number-element');
+  cardExpiry.mount('#card-expiry-element');
+  cardCvc.mount('#card-cvc-element');
+
+  let numberComplete = false;
+  let expiryComplete = false;
+  let cvcComplete    = false;
+
+  function actualizarBoton() {
+    submitPaymentBtn.disabled = !(numberComplete && expiryComplete && cvcComplete);
+  }
+
+  cardNumber.addEventListener('change', (e) => {
+    cardErrorsEl.textContent = e.error ? e.error.message : '';
+    numberComplete = e.complete;
+    actualizarBoton();
+  });
+  cardExpiry.addEventListener('change', (e) => {
+    cardErrorsEl.textContent = e.error ? e.error.message : '';
+    expiryComplete = e.complete;
+    actualizarBoton();
+  });
+  cardCvc.addEventListener('change', (e) => {
+    cardErrorsEl.textContent = e.error ? e.error.message : '';
+    cvcComplete = e.complete;
+    actualizarBoton();
   });
 
-  cardElement.mount('#card-element');
-
-  cardElement.addEventListener('change', (event) => {
-    if (event.error) {
-      cardErrorsEl.textContent = event.error.message;
-    } else {
-      cardErrorsEl.textContent = '';
-    }
-
-    // Enable submit only when card is complete and no error
-    submitPaymentBtn.disabled = !event.complete;
-  });
-
-  return { stripe, cardElement };
+  return { stripe, cardNumber };
 }
 
 // ================== PAYMENT FLOW ==================
-async function procesarPago(stripe, cardElement, planId) {
+async function procesarPago(stripe, cardNumber, planId) {
   submitPaymentBtn.disabled = true;
   submitPaymentBtn.textContent = '⏳ Procesando...';
   submitPaymentBtn.classList.add('processing');
   mostrarResultado(paymentResultEl, 'Iniciando proceso de pago...', 'loading');
+
+  const zipInput = document.getElementById('card-zip');
 
   try {
     // Step 1: Initiate payment
@@ -150,7 +178,8 @@ async function procesarPago(stripe, cardElement, planId) {
     }
 
     const pagoData = await iniciarResponse.json();
-    const { clientSecret, stripePaymentIntentId } = pagoData;
+    const pagoPayload = pagoData.data || pagoData;
+    const { clientSecret, stripePaymentIntentId } = pagoPayload;
 
     if (!clientSecret) {
       throw new Error('No se recibió el client secret de Stripe');
@@ -159,10 +188,14 @@ async function procesarPago(stripe, cardElement, planId) {
     mostrarResultado(paymentResultEl, 'Confirmando pago con Stripe...', 'loading');
 
     // Step 2: Confirm payment with Stripe
+    const billingDetails = zipInput.value.trim()
+      ? { address: { postal_code: zipInput.value.trim() } }
+      : {};
+
     const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
       clientSecret,
       {
-        payment_method: { card: cardElement },
+        payment_method: { card: cardNumber, billing_details: billingDetails },
       }
     );
 
@@ -188,7 +221,8 @@ async function procesarPago(stripe, cardElement, planId) {
       throw new Error(err.message || 'Error al confirmar la suscripción');
     }
 
-    const suscripcion = await confirmarResponse.json();
+    const confirmarJson = await confirmarResponse.json();
+    const suscripcion = confirmarJson.data || confirmarJson;
 
     mostrarExito(suscripcion);
   } catch (error) {
@@ -236,11 +270,19 @@ async function initApp() {
   const plan = await cargarPlan(planId);
   if (!plan) return;
 
-  const { stripe, cardElement } = inicializarStripe();
+  const stripeKey = await cargarStripeKey();
+  if (!stripeKey || stripeKey === 'pk_test_placeholder') {
+    mostrarResultado(paymentResultEl, 'El sistema de pagos no está configurado. Contacta al administrador.', 'error');
+    paymentResultEl.classList.remove('hidden');
+    submitPaymentBtn.disabled = true;
+    return;
+  }
+
+  const { stripe, cardNumber } = inicializarStripe(stripeKey);
 
   paymentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    await procesarPago(stripe, cardElement, planId);
+    await procesarPago(stripe, cardNumber, planId);
   });
 }
 

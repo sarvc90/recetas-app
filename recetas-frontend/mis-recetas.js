@@ -20,6 +20,17 @@ const editForm = document.getElementById('editForm');
 const editImageInput = document.getElementById('editRecipeImage');
 const editImagePreview = document.getElementById('editImagePreview');
 
+const crearRecetaModal = document.getElementById('crearRecetaModal');
+const closeCrearRecetaModal = document.getElementById('closeCrearRecetaModal');
+const cancelCrearRecetaBtn = document.getElementById('cancelCrearRecetaBtn');
+const crearRecetaForm = document.getElementById('crearRecetaForm');
+const crearRecetaResult = document.getElementById('crearRecetaResult');
+const crearImageInput = document.getElementById('crearRecipeImage');
+const crearImagePreview = document.getElementById('crearImagePreview');
+const crearEsExclusivaCheckbox = document.getElementById('crearEsExclusiva');
+const crearPlanSelectContainer = document.getElementById('crearPlanSelectContainer');
+const crearPlanSelect = document.getElementById('crearPlanSelect');
+
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
   return {
@@ -37,6 +48,53 @@ closeModal?.addEventListener('click', () => modal.classList.add('hidden'));
 closeEditModal?.addEventListener('click', () =>
   editModal.classList.add('hidden'),
 );
+
+function cerrarCrearRecetaModal() {
+  crearRecetaModal.classList.add('hidden');
+  crearRecetaForm.reset();
+  crearImagePreview.replaceChildren();
+  crearRecetaResult.classList.add('hidden');
+  crearPlanSelectContainer.classList.add('hidden');
+  if (crearEsExclusivaCheckbox) crearEsExclusivaCheckbox.checked = false;
+}
+
+closeCrearRecetaModal?.addEventListener('click', cerrarCrearRecetaModal);
+cancelCrearRecetaBtn?.addEventListener('click', cerrarCrearRecetaModal);
+
+crearRecetaModal?.addEventListener('click', (e) => {
+  if (e.target === crearRecetaModal) cerrarCrearRecetaModal();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !crearRecetaModal?.classList.contains('hidden')) {
+    cerrarCrearRecetaModal();
+  }
+});
+
+crearEsExclusivaCheckbox?.addEventListener('change', () => {
+  crearPlanSelectContainer.classList.toggle(
+    'hidden',
+    !crearEsExclusivaCheckbox.checked,
+  );
+});
+
+crearImageInput?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      crearImagePreview.replaceChildren();
+      const previewImage = document.createElement('img');
+      previewImage.src = ev.target.result;
+      previewImage.alt = 'Preview';
+      previewImage.width = 300;
+      previewImage.height = 200;
+      previewImage.loading = 'lazy';
+      crearImagePreview.appendChild(previewImage);
+    };
+    reader.readAsDataURL(file);
+  }
+});
 
 function construirHeader(container, usuario) {
   const fotoPerfil = usuario.fotoPerfil || localStorage.getItem('usuarioFoto');
@@ -126,7 +184,43 @@ async function initApp() {
     construirHeader(container, usuario);
   }
 
-  await cargarMisRecetas(usuario.id);
+  document.getElementById('nuevaRecetaBtn')?.addEventListener('click', () => {
+    crearRecetaModal.classList.remove('hidden');
+  });
+
+  await Promise.all([
+    cargarMisRecetas(usuario.id),
+    cargarPlanesParaSelector(usuario.id),
+  ]);
+}
+
+async function cargarPlanesParaSelector(usuarioId) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/planes/creador/${usuarioId}`,
+      { headers: getAuthHeaders() },
+    );
+    if (!response.ok) return;
+    const json = await response.json();
+    const planes = Array.isArray(json) ? json : (json.data || []);
+    const activos = planes.filter((p) => p.estado === 'ACTIVO');
+    crearPlanSelect.replaceChildren();
+    if (activos.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'Sin planes activos';
+      crearPlanSelect.appendChild(opt);
+      return;
+    }
+    activos.forEach((p) => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nombre;
+      crearPlanSelect.appendChild(opt);
+    });
+  } catch (err) {
+    console.warn('No se pudieron cargar los planes:', err);
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -351,6 +445,91 @@ editImageInput?.addEventListener('change', (e) => {
       editImagePreview.appendChild(previewImage);
     };
     reader.readAsDataURL(file);
+  }
+});
+
+crearRecetaForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+  const nombre = document.getElementById('crearRecipeName').value.trim();
+  const descripcion = document.getElementById('crearRecipeDescription').value.trim();
+  const ingredientes = document.getElementById('crearRecipeIngredients').value.trim();
+  const instrucciones = document.getElementById('crearRecipeInstructions').value.trim();
+
+  if (!nombre || !descripcion || !ingredientes || !instrucciones) {
+    crearRecetaResult.textContent = '❌ Todos los campos son obligatorios';
+    crearRecetaResult.className = 'result error';
+    crearRecetaResult.classList.remove('hidden');
+    return;
+  }
+
+  if (!crearImageInput.files[0]) {
+    crearRecetaResult.textContent = '❌ La imagen es obligatoria';
+    crearRecetaResult.className = 'result error';
+    crearRecetaResult.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    crearRecetaResult.textContent = 'Creando receta...';
+    crearRecetaResult.className = 'result loading';
+    crearRecetaResult.classList.remove('hidden');
+
+    // 1. Upload image
+    const formData = new FormData();
+    formData.append('file', crearImageInput.files[0]);
+    const imageResponse = await fetch(`${API_BASE_URL}/recetas/upload-image`, {
+      method: 'POST',
+      headers: getAuthHeadersMultipart(),
+      body: formData,
+    });
+    if (!imageResponse.ok) throw new Error('Error al subir la imagen');
+    const imageData = await imageResponse.json();
+
+    // 2. Create recipe
+    const recetaPayload = {
+      nombre,
+      descripcion,
+      ingredientes,
+      instrucciones,
+      imagenUrl: imageData.url,
+      usuarioId: usuario.id,
+    };
+    const recetaResponse = await fetch(API_RECETAS_URL, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(recetaPayload),
+    });
+    if (!recetaResponse.ok) throw new Error('Error al crear la receta');
+    const nuevaReceta = await recetaResponse.json();
+
+    // 3. Assign to exclusive plan if requested
+    if (crearEsExclusivaCheckbox.checked && crearPlanSelect.value) {
+      const planId = crearPlanSelect.value;
+      const asignarResponse = await fetch(
+        `${API_BASE_URL}/planes/${planId}/recetas`,
+        {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ recetaIds: [nuevaReceta.id] }),
+        },
+      );
+      if (!asignarResponse.ok) {
+        console.warn('Receta creada pero no se pudo asignar al plan');
+      }
+    }
+
+    cerrarCrearRecetaModal();
+    await cargarMisRecetas(usuario.id);
+    message.textContent = '✅ Receta creada correctamente';
+    message.classList.remove('hidden');
+    setTimeout(() => message.classList.add('hidden'), 3000);
+  } catch (error) {
+    console.error(error);
+    crearRecetaResult.textContent = '❌ Error: ' + error.message;
+    crearRecetaResult.className = 'result error';
+    crearRecetaResult.classList.remove('hidden');
   }
 });
 
