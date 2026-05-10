@@ -17,7 +17,7 @@ RUN apk add --no-cache curl tini && \
 
 WORKDIR /opt/recetas
 
-COPY --from=builder --chown=recetas:recetas /build/target/recetas-app-0.0.1-SNAPSHOT.jar /opt/recetas/recetas.jar
+COPY --from=builder --chown=recetas:recetas /build/target/recetas.jar /opt/recetas/recetas.jar
 
 USER recetas
 EXPOSE 8080
