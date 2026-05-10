@@ -11,6 +11,12 @@ services:
     networks:
       - recetas-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend:
     build:
@@ -21,7 +27,8 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - recetas-network
     volumes:
@@ -31,6 +38,12 @@ services:
       - ./frontend/nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     command: "/bin/sh -c 'while :; do sleep 12h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   certbot:
     image: certbot/certbot
@@ -40,6 +53,12 @@ services:
       - ./frontend/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "certbot", "--version"]
+      interval: 12h
+      timeout: 10s
+      retries: 2
+      start_period: 10s
 
   prometheus:
     image: prom/prometheus:latest
@@ -56,6 +75,12 @@ services:
     networks:
       - recetas-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   grafana:
     image: grafana/grafana:latest
@@ -72,10 +97,17 @@ services:
     expose:
       - "3000"
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_healthy
     networks:
       - recetas-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   recetas-network:
