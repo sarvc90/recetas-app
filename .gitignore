@@ -1,2 +1,13 @@
 .idea/
 .idea/shelf/
+
+# Secrets / host-side state (never commit)
+recetas.env
+**/.htpasswd
+
+# Docker / compose runtime artifacts
+docker/frontend/certbot/conf/
+docker/frontend/certbot/www/
+docker/observability/prometheus/prometheus-data/
+docker/observability/grafana/grafana-data/
+docker/backend/app.jar

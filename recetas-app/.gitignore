@@ -32,7 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 
-### Resources ###
-recetas-app/src/main/resources/application.properties
-recetas-app/src/main/resources/application-dev.properties
-recetas-app/src/main/resources/application-prod.properties
+### Secrets ###
+recetas.env
+

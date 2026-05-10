@@ -1,0 +1,140 @@
+name: Deploy to EC2 (Docker Compose)
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  REMOTE_DIR: /opt/recetas
+  COMPOSE_DIR: /opt/recetas/docker
+
+jobs:
+  build:
+    name: Build backend JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build JAR
+        working-directory: recetas-app
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -ntp clean package -DskipTests
+
+      - name: Stage release bundle
+        run: |
+          set -euo pipefail
+          mkdir -p release/docker release/recetas-frontend
+          cp -r docker/. release/docker/
+          cp -r recetas-frontend/. release/recetas-frontend/
+          cp recetas-app/target/recetas.jar release/docker/backend/app.jar
+          tar -czf release.tar.gz -C release .
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: release.tar.gz
+          retention-days: 7
+
+  deploy:
+    name: Deploy to EC2
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: .
+
+      - name: SCP bundle to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          source: release.tar.gz
+          target: /tmp/recetas-deploy/
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          envs: REMOTE_DIR,COMPOSE_DIR
+          script: |
+            set -euo pipefail
+
+            # Sanity: required state must exist (provisioned once, not by CI)
+            test -f "${COMPOSE_DIR}/recetas.env"             || { echo "Missing ${COMPOSE_DIR}/recetas.env on host"; exit 1; }
+            test -f "${COMPOSE_DIR}/frontend/nginx/.htpasswd" || { echo "Missing .htpasswd on host"; exit 1; }
+
+            # Extract bundle into REMOTE_DIR, preserving recetas.env and .htpasswd
+            sudo mkdir -p "${REMOTE_DIR}"
+            TMP="$(mktemp -d)"
+            tar -xzf /tmp/recetas-deploy/release.tar.gz -C "${TMP}"
+
+            # Sync without clobbering host-only files
+            sudo rsync -a --delete \
+              --exclude 'recetas.env' \
+              --exclude 'frontend/nginx/.htpasswd' \
+              --exclude 'frontend/certbot/' \
+              --exclude 'observability/prometheus/prometheus-data/' \
+              --exclude 'observability/grafana/grafana-data/' \
+              "${TMP}/docker/" "${COMPOSE_DIR}/"
+
+            sudo rsync -a --delete "${TMP}/recetas-frontend/" "${REMOTE_DIR}/recetas-frontend/"
+
+            # Build + restart
+            cd "${COMPOSE_DIR}"
+            sudo docker compose pull --ignore-pull-failures || true
+            sudo docker compose build --pull
+            sudo docker compose up -d --remove-orphans
+
+            # Health check
+            for i in $(seq 1 20); do
+              if sudo docker compose exec -T backend \
+                   sh -c 'curl -fsS http://127.0.0.1:8080/actuator/health' \
+                   | grep -q '"status":"UP"'; then
+                echo "Backend healthy"
+                rm -rf "${TMP}"
+                exit 0
+              fi
+              sleep 3
+            done
+
+            echo "Backend failed health check"
+            sudo docker compose logs --tail=120 backend || true
+            rm -rf "${TMP}"
+            exit 1
+
+      - name: Cleanup remote bundle
+        if: always()
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          script: rm -rf /tmp/recetas-deploy
