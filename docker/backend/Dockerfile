@@ -1,15 +1,3 @@
-# Stage 1: Build
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
-
-WORKDIR /build
-
-COPY recetas-app/pom.xml .
-RUN mvn dependency:go-offline -q
-
-COPY recetas-app/src ./src
-RUN mvn package
-
-# Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
 
 RUN apk add --no-cache curl tini && \
@@ -17,7 +5,7 @@ RUN apk add --no-cache curl tini && \
 
 WORKDIR /opt/recetas
 
-COPY --from=builder --chown=recetas:recetas /build/target/recetas.jar /opt/recetas/recetas.jar
+COPY --chown=recetas:recetas docker/backend/app.jar /opt/recetas/recetas.jar
 
 USER recetas
 EXPOSE 8080
