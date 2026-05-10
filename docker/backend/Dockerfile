@@ -6,7 +6,7 @@ WORKDIR /build
 COPY recetas-app/pom.xml .
 RUN mvn dependency:go-offline -q
 
-COPY recetas-app/src ./src
+COPY ../../recetas-app/src ./src
 RUN mvn package
 
 # Stage 2: Runtime
