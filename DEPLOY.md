@@ -118,7 +118,7 @@ Required keys: `SPRING_PROFILES_ACTIVE=prod`, `DB_*`, `JWT_SECRET`, `SMTP_*`, `C
 
 ```bash
 sudo mkdir -p /opt/recetas/docker/frontend/nginx
-htpasswd -c /opt/recetas/docker/frontend/nginx/.htpasswd <admin-username>
+htpasswd -c /opt/recetas/docker/frontend/nginx/.htpasswd admin
 chmod 640 /opt/recetas/docker/frontend/nginx/.htpasswd
 ```
 Use a strong password (different from Grafana's).
@@ -138,10 +138,12 @@ sudo rsync -a docker/ /opt/recetas/docker/ \
   --exclude 'backend/app.jar' \
   --exclude '.htpasswd' \
   --exclude 'recetas.env'
+sudo mkdir -p /opt/recetas/scripts
 sudo cp scripts/init-letsencrypt.sh /opt/recetas/scripts/init-letsencrypt.sh
 sudo chmod +x /opt/recetas/scripts/init-letsencrypt.sh
 
 # Confirm staging=0 in the script (production cert), then run:
+sudo cp /opt/recetas/docker/recetas.env /tmp/recetas-bootstrap/docker/
 cd /opt/recetas
 sudo bash scripts/init-letsencrypt.sh
 ```
