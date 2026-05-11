@@ -729,8 +729,16 @@ async function initApp() {
     return;
   }
 
-  const fotoPerfil =
+  const fotoPerfilRaw =
     usuarioData.fotoPerfil || localStorage.getItem('usuarioFoto');
+
+  const esUrlSegura = fotoPerfilRaw && (
+      fotoPerfilRaw.startsWith('http') ||
+      fotoPerfilRaw.startsWith('./') ||
+      fotoPerfilRaw.startsWith('/')
+  );
+
+    const fotoPerfil = esUrlSegura ? fotoPerfilRaw : 'icon.png';
 
   const container = document.querySelector('.container');
   if (container) {
@@ -743,7 +751,7 @@ async function initApp() {
     const userProfile = document.createElement('div');
     userProfile.className = 'user-profile';
 
-    if (fotoPerfil) {
+    if (fotoPerfil && fotoPerfil !== 'icon.png') {
       const userPhoto = document.createElement('img');
       userPhoto.src = fotoPerfil;
       userPhoto.alt = 'Foto de perfil';
