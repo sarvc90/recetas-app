@@ -32,9 +32,10 @@ services:
     networks:
       - recetas-network
     volumes:
+      - ./frontend/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/nginx/conf/recetas.conf:/etc/nginx/conf.d/recetas.conf:ro
       - ./frontend/certbot/conf:/etc/letsencrypt
       - ./frontend/certbot/www:/var/www/certbot
-      - ./frontend/nginx/conf:/etc/nginx/conf.d:ro
       - ./frontend/nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     command: "/bin/sh -c 'while :; do sleep 12h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     restart: unless-stopped
@@ -76,11 +77,11 @@ services:
       - recetas-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/prometheus/-/healthy"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 30s
 
   grafana:
     image: grafana/grafana:latest
