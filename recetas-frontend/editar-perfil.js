@@ -83,7 +83,11 @@ async function cargarDatosUsuario() {
     console.log('Usando datos locales:', error);
   }
   nombreInput.value = usuarioActual.nombre || '';
-  const fotoPerfil = usuarioActual.fotoPerfil;
+
+  const fotoPerfilRaw = usuarioActual.fotoPerfil;
+  const esUrlSegura = fotoPerfilRaw && (fotoPerfilRaw.startsWith('http') || fotoPerfilRaw.startsWith('./') || fotoPerfilRaw.startsWith('/'));
+  const fotoPerfil = esUrlSegura ? fotoPerfilRaw : 'icon.png';
+
   if (fotoPerfil && fotoPerfil !== '' && fotoPerfil !== 'icon.png') {
     fotoActual.src = fotoPerfil;
     fotoActual.style.width = '100%';
