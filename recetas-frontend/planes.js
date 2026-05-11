@@ -370,7 +370,14 @@ function construirHeader(container) {
     return;
   }
 
-  const fotoPerfil = usuario.fotoPerfil || localStorage.getItem('usuarioFoto');
+  const fotoPerfilRaw = usuario.fotoPerfil || localStorage.getItem('usuarioFoto');
+
+  const esUrlSegura = fotoPerfilRaw && (
+      fotoPerfilRaw.startsWith('http') ||
+      fotoPerfilRaw.startsWith('./') ||
+      fotoPerfilRaw.startsWith('/')
+  );
+    const fotoPerfil = esUrlSegura ? fotoPerfilRaw : 'icon.png';
 
   const header = document.createElement('header');
   header.className = 'header';
@@ -381,7 +388,7 @@ function construirHeader(container) {
   const userProfile = document.createElement('div');
   userProfile.className = 'user-profile';
 
-  if (fotoPerfil) {
+  if (fotoPerfil && fotoPerfil !== 'icon.png') {
     const userPhoto = document.createElement('img');
     userPhoto.src = fotoPerfil;
     userPhoto.alt = 'Foto de perfil';
