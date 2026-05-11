@@ -1,7 +1,11 @@
 // Acceso denegado page — builds nav and checks auth
 
 function construirHeader(container, usuario) {
-  const fotoPerfil = usuario.fotoPerfil || localStorage.getItem('usuarioFoto');
+  const fotoPerfilRaw = usuario.fotoPerfil || localStorage.getItem('usuarioFoto');
+
+  // Verificamos que empiece por http, https o sea una ruta local segura
+  const esUrlSegura = fotoPerfilRaw && (fotoPerfilRaw.startsWith('http') || fotoPerfilRaw.startsWith('./') || fotoPerfilRaw.startsWith('/'));
+  const fotoPerfil = esUrlSegura ? fotoPerfilRaw : 'icon.png';// Si no es segura, usamos el icono por defecto
 
   const header = document.createElement('header');
   header.className = 'header';
@@ -12,7 +16,7 @@ function construirHeader(container, usuario) {
   const userProfile = document.createElement('div');
   userProfile.className = 'user-profile';
 
-  if (fotoPerfil) {
+  if (fotoPerfil && fotoPerfil !== 'icon.png') {
     const userPhoto = document.createElement('img');
     userPhoto.src = fotoPerfil;
     userPhoto.alt = 'Foto de perfil';
