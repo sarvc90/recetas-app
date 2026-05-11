@@ -1,3 +1,5 @@
+# Workflow for deploying the application to EC2 using Docker Compose
+
 name: Deploy to EC2 (Docker Compose)
 
 on:
