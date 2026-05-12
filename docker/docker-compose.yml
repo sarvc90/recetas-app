@@ -20,6 +20,21 @@ services:
       retries: 3
       start_period: 60s
 
+  certbot:
+    image: certbot/certbot
+    container_name: recetas-certbot
+    volumes:
+      - ./frontend/certbot/conf:/etc/letsencrypt
+      - ./frontend/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "certbot", "--version"]
+      interval: 12h
+      timeout: 10s
+      retries: 2
+      start_period: 10s
+
   frontend:
     build:
       context: ..
@@ -40,7 +55,7 @@ services:
       - ./frontend/certbot/conf:/etc/letsencrypt
       - ./frontend/certbot/www:/var/www/certbot
       - ./frontend/nginx/.htpasswd:/etc/nginx/.htpasswd:ro
-    command: "/bin/sh -c 'while :; do sleep 12h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    command: '/bin/sh -c ''while :; do sleep 12h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
@@ -49,21 +64,6 @@ services:
       retries: 3
       start_period: 15s
 
-  certbot:
-    image: certbot/certbot
-    container_name: recetas-certbot
-    volumes:
-      - ./frontend/certbot/conf:/etc/letsencrypt
-      - ./frontend/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "certbot", "--version"]
-      interval: 12h
-      timeout: 10s
-      retries: 2
-      start_period: 10s
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -71,16 +71,17 @@ services:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.external-url=https://rincon-sabores.online/prometheus/'
-      - '--web.route-prefix=/prometheus'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.external-url=https://rincon-sabores.online/prometheus/"
+      - "--web.route-prefix=/prometheus"
     expose:
       - "9090"
     networks:
       - recetas-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9090/prometheus/-/healthy"]
+      test:
+        ["CMD", "wget", "-qO-", "http://localhost:9090/prometheus/-/healthy"]
       interval: 30s
       timeout: 10s
       retries: 3

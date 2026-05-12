@@ -7,18 +7,19 @@ set -euo pipefail
 domains=(rincon-sabores.online www.rincon-sabores.online)
 rsa_key_size=4096
 email="elrinconlossabores@gmail.com"
-staging=0   # 1 = staging, 0 = producción
+staging=0
 
-read -p "Enter project directory: " PROJECT_DIR
+read -p "Enter project directory: (if you are following the DEPLOY.md instructions: /tmp/recetas-boostrap ) " PROJECT_DIR
 while [ ! -f "${PROJECT_DIR}/docker/docker-compose.yml" ]; do
   echo "No docker-compose.yml found in ${PROJECT_DIR}. Please enter the correct path."
   read -p "Enter project directory: " PROJECT_DIR
 done
 
 COMPOSE_FILE="${PROJECT_DIR}/docker/docker-compose.yml"
+BOOTSTRAP_FILE="${PROJECT_DIR}/docker/docker-compose.bootstrap.yml"
 DC=(docker compose -f "${COMPOSE_FILE}")
+DC_BOOT=(docker compose -f "${BOOTSTRAP_FILE}")
 data_path="${PROJECT_DIR}/docker/frontend/certbot"
-nginx_conf_dir="${PROJECT_DIR}/docker/frontend/nginx/conf"
 primary="${domains[0]}"
 
 # =====================================
@@ -42,29 +43,15 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
 fi
 
 # =====================================
-# FASE 1: arrancar nginx SIN SSL
-# Renombramos recetas.conf para que nginx
-# no lo cargue, y solo use el bootstrap.
+# FASE 1: nginx HTTP-only con bootstrap
 # =====================================
 echo "### Phase 1: starting nginx in HTTP-only mode ..."
-if [ -f "${nginx_conf_dir}/recetas.conf" ]; then
-  mv "${nginx_conf_dir}/recetas.conf" "${nginx_conf_dir}/recetas.conf.bak"
-fi
-
-# Aseguramos que el bootstrap esté presente
-if [ ! -f "${nginx_conf_dir}/recetas-bootstrap.conf" ]; then
-  echo "ERROR: recetas-bootstrap.conf not found in ${nginx_conf_dir}"
-  exit 1
-fi
-
-# Bajamos servicios previos y levantamos solo frontend (sin SSL)
 "${DC[@]}" down --remove-orphans 2>/dev/null || true
-"${DC[@]}" up --force-recreate --no-deps -d frontend
+"${DC_BOOT[@]}" up -d --no-deps --force-recreate frontend
 
-# Esperamos que nginx esté listo
 echo "### Waiting for nginx to be ready ..."
 for i in $(seq 1 15); do
-  if "${DC[@]}" exec frontend nginx -t 2>/dev/null; then
+  if "${DC_BOOT[@]}" exec frontend nginx -t 2>/dev/null; then
     echo "nginx is ready."
     break
   fi
@@ -82,7 +69,7 @@ for d in "${domains[@]}"; do domain_args="$domain_args -d $d"; done
 staging_arg=""
 [ "$staging" = "1" ] && staging_arg="--staging"
 
-"${DC[@]}" run --rm --entrypoint "\
+"${DC_BOOT[@]}" run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
     ${staging_arg} \
     --email ${email} \
@@ -93,20 +80,14 @@ staging_arg=""
     --force-renewal" certbot
 
 # =====================================
-# FASE 3: activar SSL en nginx
+# FASE 3: bajar bootstrap, levantar prod
 # =====================================
-echo "### Phase 3: enabling SSL config ..."
-if [ -f "${nginx_conf_dir}/recetas.conf.bak" ]; then
-  mv "${nginx_conf_dir}/recetas.conf.bak" "${nginx_conf_dir}/recetas.conf"
-fi
+echo "### Phase 3: switching to production stack ..."
+"${DC_BOOT[@]}" down --remove-orphans
 
-# Recargamos nginx con el conf SSL definitivo
-"${DC[@]}" exec frontend nginx -s reload
-
-# Levantamos el resto de servicios
-echo "### Starting remaining services ..."
+echo "### Starting full production stack ..."
 "${DC[@]}" up -d
 
 echo ""
-echo "### Done. Certificate issued and nginx running with SSL."
+echo "### Done. Certificate issued and full stack running."
 echo "### Verify: https://${primary}"

@@ -8,4 +8,12 @@ RUN rm -rf /usr/share/nginx/html/* /etc/nginx/conf.d/default.conf
 # COPY docker/frontend/nginx/conf/nginx.conf /etc/nginx/nginx.conf
 # COPY docker/frontend/nginx/conf/recetas.conf /etc/nginx/conf.d/recetas.conf
 
+COPY ./entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["nginx", "-g", "daemon off;"]
+
 EXPOSE 80 443
