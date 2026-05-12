@@ -7,10 +7,9 @@ set -euo pipefail
 domains=(rincon-sabores.online www.rincon-sabores.online)
 rsa_key_size=4096
 email="elrinconlossabores@gmail.com"
-staging=0   # 1 = Let's Encrypt staging (untrusted, high rate limit), 0 = production
+staging=0   # 1 = staging, 0 = producción
 
 read -p "Enter project directory: " PROJECT_DIR
-
 while [ ! -f "${PROJECT_DIR}/docker/docker-compose.yml" ]; do
   echo "No docker-compose.yml found in ${PROJECT_DIR}. Please enter the correct path."
   read -p "Enter project directory: " PROJECT_DIR
@@ -19,13 +18,20 @@ done
 COMPOSE_FILE="${PROJECT_DIR}/docker/docker-compose.yml"
 DC=(docker compose -f "${COMPOSE_FILE}")
 data_path="${PROJECT_DIR}/docker/frontend/certbot"
+nginx_conf_dir="${PROJECT_DIR}/docker/frontend/nginx/conf"
 primary="${domains[0]}"
 
+# =====================================
+# VERIFICAR CERTIFICADO EXISTENTE
+# =====================================
 if [ -d "$data_path/conf/live/$primary" ]; then
   read -rp "Existing certificate for $primary found. Replace? (y/N) " decision
   [[ "$decision" =~ ^[Yy]$ ]] || exit 0
 fi
 
+# =====================================
+# PARÁMETROS TLS
+# =====================================
 echo "### Downloading recommended TLS parameters ..."
 mkdir -p "$data_path/conf"
 if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
@@ -35,24 +41,40 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
     > "$data_path/conf/ssl-dhparams.pem"
 fi
 
-echo "### Creating dummy certificate for ${primary} ..."
-cert_path="/etc/letsencrypt/live/$primary"
-mkdir -p "$data_path/conf/live/$primary"
-"${DC[@]}" run --rm --entrypoint "\
-  openssl req -x509 -nodes -newkey rsa:${rsa_key_size} -days 1 \
-    -keyout '${cert_path}/privkey.pem' \
-    -out '${cert_path}/fullchain.pem' \
-    -subj '/CN=localhost'" certbot
+# =====================================
+# FASE 1: arrancar nginx SIN SSL
+# Renombramos recetas.conf para que nginx
+# no lo cargue, y solo use el bootstrap.
+# =====================================
+echo "### Phase 1: starting nginx in HTTP-only mode ..."
+if [ -f "${nginx_conf_dir}/recetas.conf" ]; then
+  mv "${nginx_conf_dir}/recetas.conf" "${nginx_conf_dir}/recetas.conf.bak"
+fi
 
-echo "### Starting nginx ..."
-"${DC[@]}" up --force-recreate -d frontend
+# Aseguramos que el bootstrap esté presente
+if [ ! -f "${nginx_conf_dir}/recetas-bootstrap.conf" ]; then
+  echo "ERROR: recetas-bootstrap.conf not found in ${nginx_conf_dir}"
+  exit 1
+fi
 
-echo "### Removing dummy certificate ..."
-"${DC[@]}" run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/${primary} && \
-  rm -Rf /etc/letsencrypt/archive/${primary} && \
-  rm -Rf /etc/letsencrypt/renewal/${primary}.conf" certbot
+# Bajamos servicios previos y levantamos solo frontend (sin SSL)
+"${DC[@]}" down --remove-orphans 2>/dev/null || true
+"${DC[@]}" up --force-recreate --no-deps -d frontend
 
+# Esperamos que nginx esté listo
+echo "### Waiting for nginx to be ready ..."
+for i in $(seq 1 15); do
+  if "${DC[@]}" exec frontend nginx -t 2>/dev/null; then
+    echo "nginx is ready."
+    break
+  fi
+  echo "  attempt $i/15 ..."
+  sleep 2
+done
+
+# =====================================
+# FASE 2: obtener certificado real
+# =====================================
 echo "### Requesting Let's Encrypt certificate for ${domains[*]} ..."
 domain_args=""
 for d in "${domains[@]}"; do domain_args="$domain_args -d $d"; done
@@ -70,7 +92,21 @@ staging_arg=""
     --non-interactive \
     --force-renewal" certbot
 
-echo "### Reloading nginx ..."
+# =====================================
+# FASE 3: activar SSL en nginx
+# =====================================
+echo "### Phase 3: enabling SSL config ..."
+if [ -f "${nginx_conf_dir}/recetas.conf.bak" ]; then
+  mv "${nginx_conf_dir}/recetas.conf.bak" "${nginx_conf_dir}/recetas.conf"
+fi
+
+# Recargamos nginx con el conf SSL definitivo
 "${DC[@]}" exec frontend nginx -s reload
 
-echo "### Done."
+# Levantamos el resto de servicios
+echo "### Starting remaining services ..."
+"${DC[@]}" up -d
+
+echo ""
+echo "### Done. Certificate issued and nginx running with SSL."
+echo "### Verify: https://${primary}"
