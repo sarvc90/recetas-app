@@ -9,7 +9,7 @@ rsa_key_size=4096
 email="elrinconlossabores@gmail.com"
 staging=0
 
-read -p "Enter project directory: (if you are following the DEPLOY.md instructions: /tmp/recetas-boostrap ) " PROJECT_DIR
+read -p "Enter project directory: (if you are following the DEPLOY.md instructions: /tmp/recetas-bootstrap ) " PROJECT_DIR
 while [ ! -f "${PROJECT_DIR}/docker/docker-compose.yml" ]; do
   echo "No docker-compose.yml found in ${PROJECT_DIR}. Please enter the correct path."
   read -p "Enter project directory: " PROJECT_DIR
