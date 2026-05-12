@@ -12,6 +12,7 @@ import com.recetas.app.entity.Usuario;
 import com.recetas.app.repository.CodigoRecuperacionRepository;
 import com.recetas.app.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,8 +23,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AuthService {
 
+public class AuthService {
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
     private static final int MINUTOS_EXPIRACION = 5;
 
     @Autowired
@@ -56,12 +59,15 @@ public class AuthService {
             throw new IllegalArgumentException("Debes verificar tu email antes de iniciar sesión");
         }
 
-        if (request.getAuthCode() == null) {
-            enviarCodigoAutenticacion(usuario);
-            return new ApiResponse<>(true, "Si el email está registrado, recibirás un código de autenticación para completar el inicio de sesión");
+        if ("dev".equals(activeProfile)) {
+            // En dev saltamos el 2FA
+        } else {
+            if (request.getAuthCode() == null) {
+                enviarCodigoAutenticacion(usuario);
+                return new ApiResponse<>(true, "Si el email está registrado, recibirás un código de autenticación para completar el inicio de sesión");
+            }
+            validarCodigoAutenticacion(usuario, request.getAuthCode());
         }
-
-        validarCodigoAutenticacion(usuario, request.getAuthCode());
 
         usuario.setUltimoAcceso(LocalDateTime.now());
         usuarioRepository.save(usuario);
@@ -123,10 +129,13 @@ public class AuthService {
         String verificationCode = normalizarCodigo(request.getVerificationCode());
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
 
+        if ("dev".equals(activeProfile)) {
+            return registroDirectoSinVerificacion(request, usuarioOpt);
+        }
+
         if (verificationCode == null) {
             return iniciarRegistroConVerificacion(request, usuarioOpt);
         }
-
         return confirmarRegistroConCodigo(request, usuarioOpt, verificationCode);
     }
 
@@ -274,5 +283,22 @@ public class AuthService {
             return "Revisa la configuración SMTP del servidor";
         }
         return exception.getMessage();
+    }
+    private ApiResponse<UsuarioResponse> registroDirectoSinVerificacion(RegistroRequest request, Optional<Usuario> usuarioOpt) {
+        if (usuarioOpt.isPresent() && usuarioOpt.get().isEmailVerificado()) {
+            throw new IllegalArgumentException("El email ya está registrado");
+        }
+
+        Usuario usuario = usuarioOpt.orElse(new Usuario(
+                request.getNombre(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword())
+        ));
+
+        usuario.setEmailVerificado(true);
+        usuario.setUltimoAcceso(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+
+        return new ApiResponse<>(true, "Registro exitoso (modo dev)", buildUsuarioResponse(usuario));
     }
 }
