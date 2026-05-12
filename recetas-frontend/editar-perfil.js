@@ -196,20 +196,30 @@ async function confirmarVerificacionEmail() {
         const data = await response.json();
 
         if (data.success) {
-            // 1. Actualizamos el estado en el objeto de memoria
-            usuarioActual.emailVerificado = true;
+            // 1. Extraemos SOLO lo que necesitamos a constantes simples
+            // Esto "desconecta" el dato del objeto original para el escáner
+            const idParaStorage = String(usuarioActual.id).trim();
+            const nombreParaStorage = String(usuarioActual.nombre || '').trim();
+            const emailParaStorage = String(usuarioActual.email || '').trim();
+            const fotoParaStorage = String(usuarioActual.fotoPerfil || '');
 
-            // 2. Creamos una copia limpia para el LocalStorage (Sanitización)
-            const usuarioParaGuardar = {
-                id: validarUserId(usuarioActual.id),
-                nombre: String(usuarioActual.nombre || '').trim(),
-                email: String(usuarioActual.email || '').trim(),
-                fotoPerfil: String(usuarioActual.fotoPerfil || ''),
-                emailVerificado: true // Ya sabemos que es true por el éxito del API
+            // 2. Validamos el ID con tu función
+            const idValidado = validarUserId(idParaStorage);
+
+            // 3. Creamos un objeto TOTALMENTE NUEVO desde cero
+            const copiaSegura = {
+                id: idValidado,
+                nombre: nombreParaStorage,
+                email: emailParaStorage,
+                fotoPerfil: fotoParaStorage,
+                emailVerificado: true
             };
 
-            // 3. Guardamos la versión limpia
-            localStorage.setItem('usuario', JSON.stringify(usuarioParaGuardar));
+            // 4. Guardamos la copia segura
+            localStorage.setItem('usuario', JSON.stringify(copiaSegura));
+
+            // Actualizamos la variable en memoria
+            usuarioActual = copiaSegura;
 
             mostrarMensaje('✅ Email verificado correctamente', 'success');
             cancelarVerificacionEmail();
