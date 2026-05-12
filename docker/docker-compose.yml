@@ -42,7 +42,7 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: recetas-letsencrypt
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./frontend/nginx/certs:/etc/nginx/certs:ro
     volumes_from:
       - nginx-proxy:rw
