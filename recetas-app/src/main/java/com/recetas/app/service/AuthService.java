@@ -59,15 +59,13 @@ public class AuthService {
             throw new IllegalArgumentException("Debes verificar tu email antes de iniciar sesión");
         }
 
-        if ("dev".equals(activeProfile)) {
-            // En dev saltamos el 2FA
-        } else {
+
             if (request.getAuthCode() == null) {
                 enviarCodigoAutenticacion(usuario);
                 return new ApiResponse<>(true, "Si el email está registrado, recibirás un código de autenticación para completar el inicio de sesión");
             }
             validarCodigoAutenticacion(usuario, request.getAuthCode());
-        }
+
 
         usuario.setUltimoAcceso(LocalDateTime.now());
         usuarioRepository.save(usuario);
@@ -129,9 +127,7 @@ public class AuthService {
         String verificationCode = normalizarCodigo(request.getVerificationCode());
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
 
-        if ("dev".equals(activeProfile)) {
-            return registroDirectoSinVerificacion(request, usuarioOpt);
-        }
+
 
         if (verificationCode == null) {
             return iniciarRegistroConVerificacion(request, usuarioOpt);
