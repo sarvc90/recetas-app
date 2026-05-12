@@ -51,6 +51,10 @@ services:
   frontend:
     image: nginx:latest
     container_name: recetas-frontend
+    environment:
+      - VIRTUAL_HOST=rincon-sabores.online,www.rincon-sabores.online
+      - LETSENCRYPT_HOST=rincon-sabores.online,www.rincon-sabores.online
+      - LETSENCRYPT_EMAIL=elrinconlossabores@gmail.com
     expose:
       - "80"
     depends_on:
@@ -60,8 +64,8 @@ services:
       - recetas-network
     volumes:
       - ./frontend/nginx/www:/usr/share/nginx/html:ro
-      - ./frontend/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./frontend/nginx/conf/recetas.conf:/etc/nginx/conf.d/recetas.conf:ro
+      # - ./frontend/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./frontend/nginx/conf/recetas.conf:/etc/nginx/conf.d/recetas.conf:ro
       - /home/admin/.htpasswd:/etc/nginx/.htpasswd:ro
     restart: unless-stopped
     healthcheck:
@@ -70,10 +74,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
-    environment:
-      - VIRTUAL_HOST=rincon-sabores.online,www.rincon-sabores.online
-      - LETSENCRYPT_HOST=rincon-sabores.online,www.rincon-sabores.online
-      - LETSENCRYPT_EMAIL=elrinconlossabores@gmail.com
 
   prometheus:
     image: prom/prometheus:latest
@@ -101,13 +101,13 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
-    env_file:
-      - ./recetas.env
     environment:
-      GF_SERVER_ROOT_URL: https://rincon-sabores.online/grafana/
-      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
-      GF_AUTH_ANONYMOUS_ENABLED: "false"
-      GF_USERS_ALLOW_SIGN_UP: "false"
+      - GF_SERVER_ROOT_URL=https://rincon-sabores.online/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - VIRTUAL_HOST=rincon-sabores.online,www.rincon-sabores.online
+      - VIRTUAL_PORT=3000
     volumes:
       - grafana-data:/var/lib/grafana
     expose:
