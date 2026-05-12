@@ -21,6 +21,10 @@ public class PlanRequest {
     @Min(value = 1, message = "La duración debe ser al menos 1 día")
     private Integer duracionDias;
 
+    public PlanRequest(String planBásico, String descripción, BigDecimal bigDecimal, int i) {
+    }
+
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
