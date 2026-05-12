@@ -10,7 +10,8 @@ email="elrinconlossabores@gmail.com"
 staging=0
 
 read -p "Enter project directory: (if you are following the DEPLOY.md instructions: /tmp/recetas-bootstrap ) " PROJECT_DIR
-while [ ! -f "${PROJECT_DIR}/docker/docker-compose.yml" ]; do
+
+while [[ ! -f "${PROJECT_DIR}/docker/docker-compose.yml" ]]; do
   echo "No docker-compose.yml found in ${PROJECT_DIR}. Please enter the correct path."
   read -p "Enter project directory: " PROJECT_DIR
 done
@@ -25,7 +26,7 @@ primary="${domains[0]}"
 # =====================================
 # VERIFICAR CERTIFICADO EXISTENTE
 # =====================================
-if [ -d "$data_path/conf/live/$primary" ]; then
+if [[ -d "$data_path/conf/live/$primary" ]]; then
   read -rp "Existing certificate for $primary found. Replace? (y/N) " decision
   [[ "$decision" =~ ^[Yy]$ ]] || exit 0
 fi
@@ -35,7 +36,7 @@ fi
 # =====================================
 echo "### Downloading recommended TLS parameters ..."
 mkdir -p "$data_path/conf"
-if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
+if [[ ! -e "$data_path/conf/options-ssl-nginx.conf" ]] || [[ ! -e "$data_path/conf/ssl-dhparams.pem" ]]; then
   curl -fsSL https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf \
     > "$data_path/conf/options-ssl-nginx.conf"
   curl -fsSL https://ssl-config.mozilla.org/ffdhe2048.txt \
@@ -67,7 +68,7 @@ domain_args=""
 for d in "${domains[@]}"; do domain_args="$domain_args -d $d"; done
 
 staging_arg=""
-[ "$staging" = "1" ] && staging_arg="--staging"
+[[ "$staging" = "1" ]] && staging_arg="--staging"
 
 "${DC_BOOT[@]}" run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
