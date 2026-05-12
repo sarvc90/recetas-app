@@ -64,20 +64,31 @@ function bindButtons() {
     .addEventListener('click', () => window.history.back());
 }
 
+/**
+ * Valida que el ID sea numérico.
+ * Esto asegura el flujo de datos y resuelve el Hotspot S8476.
+ */
+function validarUserId(id) {
+    const idStr = String(id).trim();
+    // Esta regex solo permite números del 0 al 9
+    const regexNumerica = /^[0-9]+$/;
+
+    if (!idStr || !regexNumerica.test(idStr)) {
+        throw new Error("ID de usuario no válido: debe ser numérico");
+    }
+    return idStr;
+}
+
 async function cargarDatosUsuario() {
   try {
     // Validamos y limpiamos el ID para que SonarCloud lo considere seguro
-    const userId = String(usuarioActual.id).trim();
-    if (!userId || userId.includes('/') || userId.includes('?')) {
-      throw new Error("ID de usuario no válido");
-    }
-
-    const response = await fetch(
-        `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}`,
-        {
-          headers: getAuthHeaders(),
-        },
-    );
+    const userId = validarUserId(usuarioActual.id);
+      const response = await fetch(
+          `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}`,
+          {
+              headers: getAuthHeaders(),
+          },
+      );
 
     if (response.ok) {
       const data = await response.json();
@@ -125,12 +136,13 @@ function actualizarEstadoEmail() {
 
 // ─── VERIFICACIÓN DE EMAIL ──────────────────────────────────────────────────
 async function solicitarVerificacionEmail() {
-  try {
-    mostrarMensaje('⏳ Enviando código de verificación...', 'loading');
-    const response = await fetch(
-        `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/solicitar-verificacion-email`,
-        { method: 'POST', headers: getAuthHeaders() },
-    );
+    try {
+        const userId = validarUserId(usuarioActual.id); // 2. VALIDADO AQUÍ
+        mostrarMensaje('⏳ Enviando código de verificación...', 'loading');
+        const response = await fetch(
+            `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}/solicitar-verificacion-email`,
+            { method: 'POST', headers: getAuthHeaders() },
+        );
     const data = await response.json();
 
     if (data.success) {
@@ -153,37 +165,38 @@ async function solicitarVerificacionEmail() {
 }
 
 async function confirmarVerificacionEmail() {
-  const codigo = document.getElementById('codigo-verificacion').value.trim();
+    const codigo = document.getElementById('codigo-verificacion').value.trim();
 
-  if (!codigo || codigo.length !== 6) {
-    mostrarMensaje('❌ El código debe tener exactamente 6 dígitos', 'error');
-    return;
-  }
-
-  try {
-    mostrarMensaje('⏳ Verificando código...', 'loading');
-    const response = await fetch(
-        `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/verificar-email`,
-        {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ codigo }),
-        },
-    );
-    const data = await response.json();
-
-    if (data.success) {
-      usuarioActual.emailVerificado = true;
-      localStorage.setItem('usuario', JSON.stringify(usuarioActual));
-      mostrarMensaje('✅ Email verificado correctamente', 'success');
-      cancelarVerificacionEmail();
-      actualizarEstadoEmail();
-    } else {
-      mostrarMensaje('❌ ' + (data.message || 'Código incorrecto'), 'error');
+    if (!codigo || codigo.length !== 6) {
+        mostrarMensaje('❌ El código debe tener exactamente 6 dígitos', 'error');
+        return;
     }
-  } catch (error) {
-    mostrarMensaje('❌ Error de conexión: ' + error.message, 'error');
-  }
+
+    try {
+        const userId = validarUserId(usuarioActual.id); // 3. VALIDADO AQUÍ
+        mostrarMensaje('⏳ Verificando código...', 'loading');
+        const response = await fetch(
+            `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}/verificar-email`,
+            {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ codigo }),
+            },
+        );
+        const data = await response.json();
+
+        if (data.success) {
+            usuarioActual.emailVerificado = true;
+            localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+            mostrarMensaje('✅ Email verificado correctamente', 'success');
+            cancelarVerificacionEmail();
+            actualizarEstadoEmail();
+        } else {
+            mostrarMensaje('❌ ' + (data.message || 'Código incorrecto'), 'error');
+        }
+    } catch (error) {
+        mostrarMensaje('❌ Error de conexión: ' + error.message, 'error');
+    }
 }
 
 function cancelarVerificacionEmail() {
@@ -224,14 +237,15 @@ editarPerfilForm.addEventListener('submit', async (e) => {
     return;
   }
   try {
-    loading.classList.remove('hidden');
+      const userId = validarUserId(usuarioActual.id);
+      loading.classList.remove('hidden');
     message.classList.add('hidden');
     let fotoUrl = usuarioActual.fotoPerfil || '';
     if (fotoPerfilInput.files[0]) {
       const formData = new FormData();
       formData.append('file', fotoPerfilInput.files[0]);
       const imageResponse = await fetch(
-          `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/foto`,
+          `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}/foto`,
           {
             method: 'POST',
             headers: getAuthHeadersMultipart(),
@@ -242,14 +256,14 @@ editarPerfilForm.addEventListener('submit', async (e) => {
       const imageData = await imageResponse.json();
       fotoUrl = imageData.data;
     }
-    const response = await fetch(
-        `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/perfil`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ nombre: nombre, fotoPerfil: fotoUrl }),
-        },
-    );
+      const response = await fetch(
+          `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}/perfil`,
+          {
+              method: 'PUT',
+              headers: getAuthHeaders(),
+              body: JSON.stringify({ nombre: nombre, fotoPerfil: fotoUrl }),
+          },
+      );
     if (!response.ok) throw new Error('Error al actualizar el perfil');
     const data = await response.json();
     if (data.success) {
