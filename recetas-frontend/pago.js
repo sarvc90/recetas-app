@@ -52,17 +52,41 @@ function mostrarResultado(element, mensaje, tipo) {
   element.classList.remove('hidden');
 }
 
+/**
+ * Aduana de Seguridad: Valida que el ID sea estrictamente numérico.
+ * Esto detiene ataques de URL Forging (S8476).
+ */
+function validarId(id) {
+  const idStr = String(id).trim();
+  const regexNumerica = /^[0-9]+$/;
+  if (!idStr || !regexNumerica.test(idStr)) {
+    throw new Error("Identificador no válido");
+  }
+  return idStr;
+}
+
 function obtenerPlanId() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('planId');
+  const planId = params.get('planId');
+
+  // Validamos inmediatamente al obtenerlo de la URL
+  try {
+    return planId ? validarId(planId) : null;
+  } catch (e) {
+    console.error("PlanId malformado en la URL");
+    return null;
+  }
 }
 
 // ================== LOAD PLAN ==================
 async function cargarPlan(planId) {
   try {
+    // 1. Sanitización antes del fetch
+    const safePlanId = validarId(planId);
+
     planLoadingEl.classList.remove('hidden');
 
-    const response = await fetch(`${API_BASE_URL}/planes/${planId}`, {
+    const response = await fetch(`${API_BASE_URL}/planes/${encodeURIComponent(safePlanId)}`, {
       headers: getAuthHeaders(),
     });
 

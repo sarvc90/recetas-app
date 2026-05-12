@@ -178,12 +178,25 @@ function construirHeader(container, usuario) {
   container.insertBefore(header, container.firstChild);
 }
 
+/**
+ * Valida que el ID sea numérico para evitar ataques de forja de URL (S8476).
+ */
+function validarId(id) {
+  const idStr = String(id).trim();
+  const regexNumerica = /^[0-9]+$/;
+  if (!idStr || !regexNumerica.test(idStr)) {
+    throw new Error("ID no válido: debe ser numérico");
+  }
+  return idStr;
+}
+
 async function initApp() {
-  const usuario = JSON.parse(localStorage.getItem('usuario'));
-  if (!usuario) {
+  const usuarioRaw = localStorage.getItem('usuario');
+  if (!usuarioRaw) {
     window.location.href = 'index.html';
     return;
   }
+  const usuario = JSON.parse(usuarioRaw);
 
   const container = document.querySelector('.container');
   if (container) {
@@ -194,17 +207,24 @@ async function initApp() {
     crearRecetaModal.classList.remove('hidden');
   });
 
-  await Promise.all([
-    cargarMisRecetas(usuario.id),
-    cargarPlanesParaSelector(usuario.id),
-  ]);
+  // USAMOS IDs VALIDADOS AQUÍ
+  try {
+    const userIdSafe = validarId(usuario.id);
+    await Promise.all([
+      cargarMisRecetas(userIdSafe),
+      cargarPlanesParaSelector(userIdSafe),
+    ]);
+  } catch (err) {
+    console.error("Error de inicialización:", err.message);
+  }
 }
 
 async function cargarPlanesParaSelector(usuarioId) {
   try {
+    const safeId = validarId(usuarioId); // VALIDACIÓN S8476
     const response = await fetch(
-      `${API_BASE_URL}/planes/creador/${usuarioId}`,
-      { headers: getAuthHeaders() },
+        `${API_BASE_URL}/planes/creador/${encodeURIComponent(safeId)}`,
+        { headers: getAuthHeaders() },
     );
     if (!response.ok) return;
     const json = await response.json();
@@ -237,8 +257,9 @@ if (document.readyState === 'loading') {
 
 async function cargarMisRecetas(usuarioId) {
   try {
+    const safeId = validarId(usuarioId); // VALIDACIÓN S8476
     loading.classList.remove('hidden');
-    const response = await fetch(`${API_RECETAS_URL}/usuario/${usuarioId}`, {
+    const response = await fetch(`${API_RECETAS_URL}/usuario/${encodeURIComponent(safeId)}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Error al cargar tus recetas');
@@ -378,18 +399,15 @@ editForm.addEventListener('submit', async (e) => {
   const recetaId = editForm.dataset.recetaId;
   const usuario = JSON.parse(localStorage.getItem('usuario'));
   try {
+    const safeRecetaId = validarId(recetaId); // VALIDACIÓN S8476
+    const safeUserId = validarId(usuario.id); // VALIDACIÓN S8476
+
     const datos = {
       nombre: document.getElementById('editRecipeName').value.trim(),
-      descripcion: document
-        .getElementById('editRecipeDescription')
-        .value.trim(),
-      ingredientes: document
-        .getElementById('editRecipeIngredients')
-        .value.trim(),
-      instrucciones: document
-        .getElementById('editRecipeInstructions')
-        .value.trim(),
-      usuarioId: usuario.id,
+      descripcion: document.getElementById('editRecipeDescription').value.trim(),
+      ingredientes: document.getElementById('editRecipeIngredients').value.trim(),
+      instrucciones: document.getElementById('editRecipeInstructions').value.trim(),
+      usuarioId: safeUserId,
     };
     if (
       !datos.nombre ||
@@ -416,7 +434,7 @@ editForm.addEventListener('submit', async (e) => {
     } else {
       datos.imagenUrl = editForm.dataset.imagenActual;
     }
-    const response = await fetch(`${API_RECETAS_URL}/${recetaId}`, {
+    const response = await fetch(`${API_RECETAS_URL}/${encodeURIComponent(safeRecetaId)}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(datos),
@@ -542,7 +560,8 @@ crearRecetaForm?.addEventListener('submit', async (e) => {
 async function eliminarReceta(id, card) {
   if (!confirm('¿Seguro que deseas eliminar esta receta?')) return;
   try {
-    const response = await fetch(`${API_RECETAS_URL}/${id}`, {
+    const safeId = validarId(id); // VALIDACIÓN S8476
+    const response = await fetch(`${API_RECETAS_URL}/${encodeURIComponent(safeId)}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });

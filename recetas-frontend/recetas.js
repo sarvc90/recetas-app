@@ -688,18 +688,35 @@ async function buscarRecetas() {
   }
 }
 
+/**
+ * Valida que el ID sea numérico para evitar ataques de forja de URL (S8476).
+ */
+function validarId(id) {
+  const idStr = String(id).trim();
+  const regexNumerica = /^[0-9]+$/;
+  if (!idStr || !regexNumerica.test(idStr)) {
+    throw new Error("ID no válido");
+  }
+  return idStr;
+}
+
 // ================== CARGAR PLANES EN SELECTOR ==================
 async function cargarPlanesEnSelector(usuarioId) {
   if (!planSelect) return;
   try {
+    // APLICAMOS VALIDACIÓN ANTES DEL FETCH (S8476)
+    const safeId = validarId(usuarioId);
+
     const response = await fetch(
-      `${API_BASE_URL}/planes/creador/${usuarioId}`,
-      { headers: getAuthHeaders() },
+        `${API_BASE_URL}/planes/creador/${encodeURIComponent(safeId)}`,
+        { headers: getAuthHeaders() },
     );
+
     if (!response.ok) return;
     const json = await response.json();
     const planes = Array.isArray(json) ? json : (json.data || []);
     const activos = planes.filter((p) => p.estado === 'ACTIVO');
+
     planSelect.replaceChildren();
     if (activos.length === 0) {
       const opt = document.createElement('option');
