@@ -196,8 +196,21 @@ async function confirmarVerificacionEmail() {
         const data = await response.json();
 
         if (data.success) {
+            // 1. Actualizamos el estado en el objeto de memoria
             usuarioActual.emailVerificado = true;
-            localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+
+            // 2. Creamos una copia limpia para el LocalStorage (Sanitización)
+            const usuarioParaGuardar = {
+                id: validarUserId(usuarioActual.id),
+                nombre: String(usuarioActual.nombre || '').trim(),
+                email: String(usuarioActual.email || '').trim(),
+                fotoPerfil: String(usuarioActual.fotoPerfil || ''),
+                emailVerificado: true // Ya sabemos que es true por el éxito del API
+            };
+
+            // 3. Guardamos la versión limpia
+            localStorage.setItem('usuario', JSON.stringify(usuarioParaGuardar));
+
             mostrarMensaje('✅ Email verificado correctamente', 'success');
             cancelarVerificacionEmail();
             actualizarEstadoEmail();
