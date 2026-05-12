@@ -90,13 +90,23 @@ async function cargarDatosUsuario() {
           },
       );
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.data) {
-        usuarioActual = data.data;
-        localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+      if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+              // "Sanitizamos" el objeto creando uno nuevo solo con los campos permitidos
+              // Esto evita el 'Browser storage poisoning'
+              const usuarioSanitizado = {
+                  id: validarUserId(data.data.id), // Reutilizamos tu validación numérica
+                  nombre: String(data.data.nombre || '').trim(),
+                  email: String(data.data.email || '').trim(),
+                  fotoPerfil: String(data.data.fotoPerfil || ''),
+                  emailVerificado: Boolean(data.data.emailVerificado)
+              };
+
+              usuarioActual = usuarioSanitizado;
+              localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+          }
       }
-    }
   } catch (error) {
     console.log('Usando datos locales:', error);
   }
@@ -267,16 +277,16 @@ editarPerfilForm.addEventListener('submit', async (e) => {
     if (!response.ok) throw new Error('Error al actualizar el perfil');
     const data = await response.json();
     if (data.success) {
-      const usuarioActualizado = {
-        id: usuarioActual.id,
-        nombre: data.data.nombre,
-        email: usuarioActual.email,
-        fotoPerfil: data.data.fotoPerfil,
-        emailVerificado:
-          data.data.emailVerificado ?? usuarioActual.emailVerificado,
-      };
-      localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
-      mostrarMensaje('✅ Perfil actualizado correctamente', 'success');
+        const usuarioActualizado = {
+            id: validarUserId(usuarioActual.id),
+            nombre: String(data.data.nombre || '').trim(),
+            email: String(usuarioActual.email || '').trim(),
+            fotoPerfil: String(data.data.fotoPerfil || ''),
+            emailVerificado: Boolean(data.data.emailVerificado ?? usuarioActual.emailVerificado),
+        };
+
+        localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+        mostrarMensaje('✅ Perfil actualizado correctamente', 'success');
       setTimeout(() => {
         window.location.href = 'recetas.html';
       }, 1500);
