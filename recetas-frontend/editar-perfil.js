@@ -66,12 +66,19 @@ function bindButtons() {
 
 async function cargarDatosUsuario() {
   try {
+    // Validamos y limpiamos el ID para que SonarCloud lo considere seguro
+    const userId = String(usuarioActual.id).trim();
+    if (!userId || userId.includes('/') || userId.includes('?')) {
+      throw new Error("ID de usuario no válido");
+    }
+
     const response = await fetch(
-      `${API_BASE_URL}/usuarios/${usuarioActual.id}`,
-      {
-        headers: getAuthHeaders(),
-      },
+        `${API_BASE_URL}/usuarios/${encodeURIComponent(userId)}`,
+        {
+          headers: getAuthHeaders(),
+        },
     );
+
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.data) {
@@ -121,8 +128,8 @@ async function solicitarVerificacionEmail() {
   try {
     mostrarMensaje('⏳ Enviando código de verificación...', 'loading');
     const response = await fetch(
-      `${API_BASE_URL}/usuarios/${usuarioActual.id}/solicitar-verificacion-email`,
-      { method: 'POST', headers: getAuthHeaders() },
+        `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/solicitar-verificacion-email`,
+        { method: 'POST', headers: getAuthHeaders() },
     );
     const data = await response.json();
 
@@ -156,12 +163,12 @@ async function confirmarVerificacionEmail() {
   try {
     mostrarMensaje('⏳ Verificando código...', 'loading');
     const response = await fetch(
-      `${API_BASE_URL}/usuarios/${usuarioActual.id}/verificar-email`,
-      {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ codigo }),
-      },
+        `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/verificar-email`,
+        {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ codigo }),
+        },
     );
     const data = await response.json();
 
@@ -224,24 +231,24 @@ editarPerfilForm.addEventListener('submit', async (e) => {
       const formData = new FormData();
       formData.append('file', fotoPerfilInput.files[0]);
       const imageResponse = await fetch(
-        `${API_BASE_URL}/usuarios/${usuarioActual.id}/foto`,
-        {
-          method: 'POST',
-          headers: getAuthHeadersMultipart(),
-          body: formData,
-        },
+          `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/foto`,
+          {
+            method: 'POST',
+            headers: getAuthHeadersMultipart(),
+            body: formData,
+          },
       );
       if (!imageResponse.ok) throw new Error('Error al subir la imagen');
       const imageData = await imageResponse.json();
       fotoUrl = imageData.data;
     }
     const response = await fetch(
-      `${API_BASE_URL}/usuarios/${usuarioActual.id}/perfil`,
-      {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ nombre: nombre, fotoPerfil: fotoUrl }),
-      },
+        `${API_BASE_URL}/usuarios/${encodeURIComponent(usuarioActual.id)}/perfil`,
+        {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ nombre: nombre, fotoPerfil: fotoUrl }),
+        },
     );
     if (!response.ok) throw new Error('Error al actualizar el perfil');
     const data = await response.json();
