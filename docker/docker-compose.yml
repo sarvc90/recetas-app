@@ -43,7 +43,7 @@ services:
     container_name: recetas-letsencrypt
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./frontend/nginx/certs:/etc/nginx/certs:ro
+      - ./frontend/nginx/certs:/etc/nginx/certs:rw
     volumes_from:
       - nginx-proxy:rw
     restart: unless-stopped
