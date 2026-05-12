@@ -5,7 +5,7 @@ RUN apk add --no-cache curl tini && \
 
 WORKDIR /opt/recetas
 
-COPY --chown=recetas:recetas recetas-app/target/*.jar /opt/recetas/recetas.jar
+COPY --chown=recetas:recetas backend/recetas.jar /opt/recetas/recetas.jar
 
 # FIJACIÓN DE SEGURIDAD: Quitamos permisos de escritura (chmod 555)
 # Esto asegura que el archivo sea Read-Only para todos, cumpliendo con SonarCloud.

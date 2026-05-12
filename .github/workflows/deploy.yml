@@ -1,4 +1,5 @@
 # Workflow for deploying the application to EC2 using Docker Compose
+# Infra: nginx-proxy + letsencrypt-nginx-proxy-companion (auto-TLS via VIRTUAL_HOST)
 
 name: Deploy to EC2 (Docker Compose)
 
@@ -42,10 +43,17 @@ jobs:
       - name: Stage release bundle
         run: |
           set -euo pipefail
-          mkdir -p release/docker release/recetas-frontend
-          cp -r docker/. release/docker/
-          cp -r recetas-frontend/. release/recetas-frontend/
-          cp recetas-app/target/recetas.jar release/docker/backend/app.jar
+          mkdir -p release/docker/backend release/docker/frontend/nginx/www
+          # Full docker/ tree (compose, nginx confs, prometheus.yml, Dockerfile)
+          rsync -a --delete \
+            --exclude 'frontend/nginx/certs/' \
+            --exclude 'observability/prometheus/prometheus-data/' \
+            --exclude 'observability/grafana/grafana-data/' \
+            docker/ release/docker/
+          # Backend JAR placed where Dockerfile expects it (build context = docker/)
+          cp recetas-app/target/recetas.jar release/docker/backend/recetas.jar
+          # Static frontend served by recetas-frontend nginx container
+          rsync -a --delete recetas-frontend/ release/docker/frontend/nginx/www/
           tar -czf release.tar.gz -C release .
 
       - name: Upload bundle
@@ -68,7 +76,6 @@ jobs:
           path: .
 
       - name: SCP bundle to EC2
-        # Cambio verificado por Sara: appleboy/scp-action@v0.1.7 -> SHA
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -89,36 +96,31 @@ jobs:
           script: |
             set -euo pipefail
 
-            # Sanity: required state must exist (provisioned once, not by CI)
-            test -f "${COMPOSE_DIR}/recetas.env"             || { echo "Missing ${COMPOSE_DIR}/recetas.env on host"; exit 1; }
-            test -f "${COMPOSE_DIR}/frontend/nginx/.htpasswd" || { echo "Missing .htpasswd on host"; exit 1; }
+            # Sanity: host-only state must exist (provisioned once, not by CI)
+            test -f "${COMPOSE_DIR}/recetas.env" || { echo "Missing ${COMPOSE_DIR}/recetas.env on host"; exit 1; }
+            test -f /home/admin/.htpasswd        || { echo "Missing /home/admin/.htpasswd on host"; exit 1; }
 
-            # Extract bundle into REMOTE_DIR, preserving recetas.env and .htpasswd
             sudo mkdir -p "${REMOTE_DIR}"
             TMP="$(mktemp -d)"
             tar -xzf /tmp/recetas-deploy/release.tar.gz -C "${TMP}"
 
-            # Sync without clobbering host-only files
+            # Sync docker/ tree, preserving host-only files and TLS state
             sudo rsync -a --delete \
               --exclude 'recetas.env' \
-              --exclude 'frontend/nginx/.htpasswd' \
-              --exclude 'frontend/certbot/' \
+              --exclude 'frontend/nginx/certs/' \
               --exclude 'observability/prometheus/prometheus-data/' \
               --exclude 'observability/grafana/grafana-data/' \
               "${TMP}/docker/" "${COMPOSE_DIR}/"
 
-            sudo rsync -a --delete "${TMP}/recetas-frontend/" "${REMOTE_DIR}/recetas-frontend/"
-
-            # Build + restart
             cd "${COMPOSE_DIR}"
             sudo docker compose pull --ignore-pull-failures || true
             sudo docker compose build --pull
             sudo docker compose up -d --remove-orphans
 
-            # Health check
+            # Health check (backend)
             for i in $(seq 1 20); do
               if sudo docker compose exec -T backend \
-                   sh -c 'curl -fsS http://127.0.0.1:8080/actuator/health' \
+                   sh -c 'wget -qO- http://127.0.0.1:8080/actuator/health' \
                    | grep -q '"status":"UP"'; then
                 echo "Backend healthy"
                 rm -rf "${TMP}"

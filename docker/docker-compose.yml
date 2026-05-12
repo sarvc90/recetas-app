@@ -3,8 +3,8 @@
 services:
   backend:
     build:
-      context: ..
-      dockerfile: docker/backend/Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: recetas-backend
     env_file:
       - ./recetas.env
