@@ -68,7 +68,8 @@ jobs:
           path: .
 
       - name: SCP bundle to EC2
-        uses: appleboy/scp-action@v0.1.7
+        # Cambio verificado por Sara: appleboy/scp-action@v0.1.7 -> SHA
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -78,7 +79,7 @@ jobs:
           target: /tmp/recetas-deploy/
 
       - name: Deploy on EC2
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -133,7 +134,7 @@ jobs:
 
       - name: Cleanup remote bundle
         if: always()
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
