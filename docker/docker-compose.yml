@@ -1,5 +1,7 @@
 # Docker Compose configuration for the Recetas application
 
+# Algún comentario
+
 services:
   backend:
     build:
