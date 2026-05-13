@@ -108,7 +108,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources:ro
+      - ./observability/grafana/datasources:/etc/grafana/provisioning/datasources:ro
     expose:
       - "3000"
     depends_on:
