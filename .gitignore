@@ -11,3 +11,5 @@ docker/frontend/certbot/www/
 docker/observability/prometheus/prometheus-data/
 docker/observability/grafana/grafana-data/
 docker/backend/app.jar
+
+docker/frontend/nginx/htpasswd/
