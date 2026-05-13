@@ -66,7 +66,7 @@ services:
     volumes:
       - ./frontend/nginx/www:/usr/share/nginx/html:ro
       - ./frontend/nginx/conf/recetas.conf:/etc/nginx/conf.d/recetas.conf:ro
-      - ./frontend/nginx/htpasswd:/etc/nginx/htpasswd:ro
+      - /home/admin/rincon-sabores.online:/etc/nginx/htpasswd:ro
       # - ./frontend/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: unless-stopped
 
